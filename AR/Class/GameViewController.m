@@ -10,10 +10,12 @@
  */
 
 #import "GameViewController.h"
+#import "AppDelegate.h"
 #import "helper/Tools.h"
+#import "Data.h"
 #import <sys/utsname.h>
 
-NSString *TAG = @"GameViewController";
+static NSString *TAG = @"GameViewController";
 
 /**
  * Small helper function to convert a fourCC <code> to
@@ -36,15 +38,13 @@ void printFloatMat4x4(const float *m) {
     }
 }
 
-@interface GameViewController(Private)
-/**
- * initialize camera
- */
+@interface GameViewController()
+
+@property (nonatomic, strong) AppDelegate *appDelegate;
+@property (nonatomic, strong) UITapGestureRecognizer *gesture;
+
 - (void)initCam;
 
-/**
- * initialize ocv_ar marker detector
- */
 - (BOOL)initDetector;
 
 /**
@@ -74,56 +74,35 @@ void printFloatMat4x4(const float *m) {
  * frame processing output for debugging
  */
 - (void)updateViews;
+
+- (void)handleGesture:(UITapGestureRecognizer *)sender;
 @end
 
 
 @implementation GameViewController
 
-- (void)printCamIntrinsicFile {
-    
-    NSLog(@"GameViewController: %@", camIntrinsicsFile);
-    
-}
 @synthesize glView;
 
-#pragma mark init/dealloc
-
+#pragma mark - init/dealloc
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // find out the ipad model
-        
-        struct utsname systemInfo;
-        uname(&systemInfo);
-        NSString *machineInfo = [NSString stringWithCString:systemInfo.machine encoding:NSASCIIStringEncoding];
-        NSString *machineInfoShort = [[machineInfo substringToIndex:5] lowercaseString];
-        
-        NSLog(@"%@: device model (short) is %@", TAG, machineInfoShort);
-        
-        int machineModelVersion = 0;
-        if ([machineInfoShort isEqualToString:@"ipad2"]) {
-            machineModelVersion = 2;
-        } else if ([machineInfoShort isEqualToString:@"ipad3"]) {
-            machineModelVersion = 3;
-        } else {
-            NSLog(@"%@: no camera intrinsics available for this model!", TAG);
-            machineModelVersion = 3;    // default. might not work!
-        }
-        
-        camIntrinsicsFile = [[NSString alloc]initWithFormat:@"ipad%d-back.xml", machineModelVersion];
-        
+
+        camIntrinsicsFile = @"ipad3-back.xml";
         useDistCoeff = USE_DIST_COEFF;
-        
         // create the detector
         detector = new ocv_ar::Detect(ocv_ar::IDENT_TYPE_CODE_7X7,  // marker type
                                       MARKER_REAL_SIZE_M,           // real marker size in meters
                                       PROJ_FLIP_MODE);              // projection flip mode
         // create the tracker and pass it a reference to the detector object
         tracker = new ocv_ar::Track(detector);
+        
+        isMultiMode = NO;
+        isGameRunning = NO;
     }
-    
-    NSLog(@"%@: initWithNibName finished", TAG);
+
+    //NSLog(@"%@: initWithNibName finished", TAG);
     return self;
 }
 
@@ -131,6 +110,7 @@ void printFloatMat4x4(const float *m) {
     NSLog(@"%@: now dealloc ...", TAG);
     
     [camIntrinsicsFile release];
+    [self.gesture release];
     
     // release camera stuff
     [vidDataOutput release];
@@ -150,8 +130,7 @@ void printFloatMat4x4(const float *m) {
     [super dealloc];
 }
 
-#pragma mark parent methods
-
+#pragma mark - parent methods
 - (void)didReceiveMemoryWarning {
     NSLog(@"memory warning!!!");
     [super didReceiveMemoryWarning];
@@ -227,6 +206,8 @@ void printFloatMat4x4(const float *m) {
 - (void)viewDidLoad {
     NSLog(@"%@: viewDidLoad ...", TAG);
     [super viewDidLoad];
+
+    self.appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     
     // init detector
     if ([self initDetector]) {
@@ -240,14 +221,33 @@ void printFloatMat4x4(const float *m) {
     
     // set up camera
     [self initCam];
+    
+    // listen to the gesture
+    self.gesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(handleGesture:)];
+    [baseView addGestureRecognizer:self.gesture];
+    
+    // Initialize notification of data recieved
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleReceivedDataWithNotification:)
+                                                 name:@"AR_DidReceiveDataNotification"
+                                               object:nil];
+    
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)o duration:(NSTimeInterval)duration {
     [self interfaceOrientationChanged:o];
 }
 
-#pragma mark AVCaptureVideoDataOutputSampleBufferDelegate methods
+#pragma mark - public methods 
+- (void)setMultiMode {
+    isMultiMode = YES;
+}
 
+- (void)setSingleMode {
+    isMultiMode = NO;
+}
+
+#pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate methods
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection
 {
@@ -275,7 +275,7 @@ void printFloatMat4x4(const float *m) {
     }
 }
 
-#pragma mark private methods
+#pragma mark - private methods
 
 - (void)updateViews {
     // this method is only to display the intermediate frame processing
@@ -443,6 +443,84 @@ void printFloatMat4x4(const float *m) {
 
 - (void)interfaceOrientationChanged:(UIInterfaceOrientation)o {
     [[(AVCaptureVideoPreviewLayer *)camView.layer connection] setVideoOrientation:(AVCaptureVideoOrientation)o];
+}
+
+#pragma mark - gesture methods
+- (void)handleGesture:(UITapGestureRecognizer *)sender {
+    
+    NSLog(@"%@: handleGesture", TAG);
+    if(sender.state == UIGestureRecognizerStateEnded) {
+        CGPoint pos = [sender locationInView:sender.view];
+        NSLog(@"%@: tap at position (%f, %f)", TAG, pos.x, pos.y);
+        
+        if ( !isMultiMode ) {
+            return;
+        }
+        
+        Data *data = [[Data alloc]init:[sender locationInView:sender.view]];
+        NSData *preparedData = [NSKeyedArchiver archivedDataWithRootObject:data];
+        NSError *error = nil;
+        [self.appDelegate.mpcHandler.session sendData:preparedData
+                                              toPeers:self.appDelegate.mpcHandler.session.connectedPeers
+                                             withMode:MCSessionSendDataReliable
+                                                error:&error];
+        
+        if (error != nil) {
+            NSLog(@"%@", [error localizedDescription]);
+        }
+        
+        [data release];
+    }
+    NSLog(@"%@: data sent", TAG);
+}
+
+#pragma mark - multi-player handling
+- (void)handleReceivedDataWithNotification:(NSNotification *)notification {
+    
+    NSDictionary *playerInfoDict = [notification userInfo];
+    
+    NSData *receivedData = [playerInfoDict objectForKey:@"data"];
+    
+    NSString *message = [[[NSString alloc] initWithData:receivedData encoding:NSUTF8StringEncoding]autorelease];
+    
+    MCPeerID *senderPeerID = [playerInfoDict objectForKey:@"peerID"];
+    NSString *senderDisplayName = senderPeerID.displayName;
+    
+    if ([message isEqualToString:@"New Game"]) {
+        if (!isGameRunning) {
+            NSString *alertMessage = [NSString stringWithFormat:@"%@ has started a new game.", senderDisplayName];
+            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"AR"
+                                                            message:alertMessage
+                                                           delegate:nil
+                                                  cancelButtonTitle:nil
+                                                  otherButtonTitles:@"Done", nil]autorelease];
+            [alert show];
+            isGameRunning = YES;
+            isHost = NO;
+        }
+    } else {
+        Data *data = [NSKeyedUnarchiver unarchiveObjectWithData:receivedData];
+        NSLog(@"%@: received tap from %@ tap at position (%f, %f)", senderDisplayName, TAG, data.x, data.y);
+    }
+}
+
+- (void)startGame {
+    if (isMultiMode && (!isGameRunning)) {
+        NSString *messageToSend = @"New Game";
+        NSData *messageAsData = [messageToSend dataUsingEncoding:NSUTF8StringEncoding];
+        NSError *error;
+        [self.appDelegate.mpcHandler.session sendData:messageAsData
+                                              toPeers:self.appDelegate.mpcHandler.session.connectedPeers
+                                             withMode:MCSessionSendDataReliable
+                                                error:&error];
+        if (error != nil) {
+            NSLog(@"%@: %@", TAG, [error localizedDescription]);
+            
+        } else{
+            isHost = YES;
+            isGameRunning = YES;
+        }
+    }
 }
 
 @end

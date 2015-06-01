@@ -16,16 +16,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-//    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-//    self.window.backgroundColor = [UIColor whiteColor];
-//    
-//    // add our custom view controller "RootViewController"
-//    GameViewController *rootViewCtrl = [[[GameViewController alloc] initWithNibName:nil bundle:nil] autorelease];
-//    [self.window setRootViewController:rootViewCtrl];
-//    
-//    // start the main application window
-//    [self.window makeKeyAndVisible];
-    
+    self.mpcHandler = [[MPCHandler alloc] init];
     return YES;
 }
 

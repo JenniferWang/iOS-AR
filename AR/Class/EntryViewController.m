@@ -8,12 +8,14 @@
 
 #import "EntryViewController.h"
 #import "GameViewController.h"
+#import "ConnectionViewController.h"
 
 static NSString *TAG = @"EntryViewController";
 
-@interface EntryViewController () {
+@interface EntryViewController ()<ConnectionViewControllerDelegate> {
     
     GameViewController *gameViewController;
+    ConnectionViewController *connectionViewController;
 }
 
 @end
@@ -26,12 +28,13 @@ static NSString *TAG = @"EntryViewController";
     
     NSLog(@"%@: deallocating...", TAG);
     [gameViewController release];
+    [connectionViewController release];
     [super dealloc];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     gameViewController = [[GameViewController alloc] initWithNibName:nil bundle:nil];
     NSLog(@"%@: finish view loading", TAG);
 }
@@ -45,18 +48,21 @@ static NSString *TAG = @"EntryViewController";
 
 - (IBAction)didButtomPressed: (id)sender {
     
-    [gameViewController printCamIntrinsicFile];
-    
     NSLog(@"%@:Button pressed: %@", TAG, [sender currentTitle]);
     if ([[sender currentTitle] isEqualToString: @"Single Mode"]) {
         NSLog(@"%@: start single mode", TAG);
+        [self showViewController: gameViewController];
+        
     } else if ([[sender currentTitle] isEqualToString: @"Multi Mode"]) {
         NSLog(@"%@: start multi mode", TAG);
+        connectionViewController = [[ConnectionViewController alloc] initWithNibName:@"ConnectionViewController" bundle:nil];
+        connectionViewController.entryViewDelegate = self;
+        [self showViewController:connectionViewController];
     }
-    [self showViewController: gameViewController];
+    
 }
 
-- (void)showViewController:(GameViewController *)vc {
+- (void)showViewController:(UIViewController *)vc {
     
     [self addChildViewController:vc];
     [self.view addSubview:vc.view];
@@ -66,13 +72,27 @@ static NSString *TAG = @"EntryViewController";
 
 }
 
-- (void)hideViewController:(GameViewController *)vc {
+- (void)hideViewController:(UIViewController *)vc {
     
     [vc willMoveToParentViewController:nil];
     [vc removeFromParentViewController];
     
     [vc.view removeFromSuperview];
     
+}
+
+#pragma mark - connection delegate 
+- (void)connectionViewControllerGoBack:(ConnectionViewController *)conViewController {
+    NSLog(@"%@:connection view controller go back", TAG);
+    [self hideViewController:conViewController];
+    
+}
+
+- (void)connectionViewControllerStartGame:(ConnectionViewController *)conViewController {
+    [self hideViewController:conViewController];
+    [self showViewController:gameViewController];
+    [gameViewController setMultiMode];
+    [gameViewController startGame];
 }
 
 @end

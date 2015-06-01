@@ -48,10 +48,15 @@
     ocv_ar::Track *tracker;     // ocv_ar::Track for marker tracking and motion interpolation
     
     BOOL useDistCoeff;      // use distortion coefficients in camera intrinsics?
+    BOOL isMultiMode;
+    BOOL isGameRunning;
+    BOOL isHost;
 }
 
-@property (nonatomic,readonly) GLView *glView;  // gl view displays the highlighted markers
+@property (nonatomic, readonly) GLView *glView;  // gl view displays the highlighted markers
 
--(void)printCamIntrinsicFile;
+-(void)setMultiMode;
+-(void)setSingleMode;
+-(void)startGame;
 
 @end

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ConnectionViewController.h"
 
 @interface EntryViewController : UIViewController
 
