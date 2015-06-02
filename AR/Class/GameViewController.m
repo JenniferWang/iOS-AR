@@ -507,7 +507,7 @@ void printFloatMat4x4(const float *m) {
     if (isMultiMode && (!isGameRunning)) {
         NSString *messageToSend = @"New Game";
         NSData *messageAsData = [messageToSend dataUsingEncoding:NSUTF8StringEncoding];
-        NSError *error;
+        NSError *error = nil;
         [self.appDelegate.mpcHandler.session sendData:messageAsData
                                               toPeers:self.appDelegate.mpcHandler.session.connectedPeers
                                              withMode:MCSessionSendDataReliable
