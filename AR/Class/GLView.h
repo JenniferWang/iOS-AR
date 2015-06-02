@@ -38,6 +38,9 @@ using namespace std;
     CGSize viewportSize;        // real gl viewport size in pixels
     
     GLfloat markerScaleMat[16]; // global marker transform (scale) matrix
+
+    GLfloat deltaX;             // object translation along x axis
+    GLfloat deltaY;             // object translation along y axis
 }
 
 @property (nonatomic, assign) ocv_ar::Track *tracker;   // tracker object that handles marker tracking and motion interpolation
@@ -60,5 +63,7 @@ using namespace std;
  * redraw the frame (will just call [self display])
  */
 - (void)render:(CADisplayLink *)displayLink;
+
+- (void)handleTapAtX:(float) x Y:(float) y;
 
 @end

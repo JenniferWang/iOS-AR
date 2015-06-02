@@ -19,13 +19,14 @@
 #define QUAD_VERTEX_BUFSIZE 		(QUAD_VERTICES * QUAD_COORDS_PER_VERTEX)
 #define QUAD_TEX_BUFSIZE 			(QUAD_VERTICES * QUAD_TEXCOORDS_PER_VERTEX)
 
-// vertex data for a quad
-const GLfloat quadVertices[] = {
-    -1, -1, 0,
-    1, -1, 0,
-    -1,  1, 0,
-    1,  1, 0 };
+const NSString *TAG = @"GLView";
 
+#pragma mark - helper
+void copyMatrix4(const float *input, float* output) {
+    for( int i = 0; i < 16; i ++) {
+        output[i] = input[i];
+    }
+}
 
 @interface GLView(Private)
 /**
@@ -47,6 +48,8 @@ const GLfloat quadVertices[] = {
  * draw a <marker>
  */
 - (void)drawMarker:(const ocv_ar::Marker *)marker;
+
+- (GLKMatrix4)updateModelViewMat: (const ocv_ar::Marker *)marker WithTapAtX:(float) x Y:(float) y;
 @end
 
 
@@ -89,6 +92,9 @@ const GLfloat quadVertices[] = {
         [self setDrawableColorFormat:GLKViewDrawableColorFormatRGBA8888];
         [self setDrawableDepthFormat:GLKViewDrawableDepthFormat24];
         [self setDrawableStencilFormat:GLKViewDrawableStencilFormat8];
+        
+        deltaX = 0;
+        deltaY = 0;
     }
     
     return self;
@@ -163,23 +169,50 @@ const GLfloat quadVertices[] = {
     markerScaleMat[15] = 1.0f;
 }
 
+- (void)handleTapAtX:(float) x Y:(float) y {
+    deltaX = x;
+    deltaY = y;
+}
+
+
 #pragma mark private methods
+// BUGGY
+- (GLKMatrix4)updateModelViewMat: (const ocv_ar::Marker *)marker WithTapAtX:(float) x Y:(float) y {
+    
+    float mat[16];
+    copyMatrix4(marker->getPoseMatPtr(), mat);
+    
+    GLKMatrix4 modelViewMat = GLKMatrix4MakeWithArray(mat);
+    GLKMatrix4 projMat = GLKMatrix4MakeWithArray(markerProjMat);
+    GLKMatrix4 projXModelViewMat = GLKMatrix4Multiply(projMat, modelViewMat);
+    
+    bool *isInvertible = nil;
+    GLKMatrix4 invModelViewMat = GLKMatrix4Invert(projXModelViewMat, isInvertible);
+    if (isInvertible != nil) {
+        NSLog(@"%@: projection * modelView is singular, return previous model view matrix", TAG);
+        return modelViewMat;
+    }else {
+        GLKVector4 tapVector = GLKVector4Make(x, y, 0, 1);
+        GLKVector4 transVector = GLKMatrix4MultiplyVector4(invModelViewMat, tapVector);
+        NSLog(@"%@: got translation vector (%f, %f, %f, %f)", TAG, transVector.x, transVector.y, transVector.z, transVector.w  );
+        return GLKMatrix4Translate(modelViewMat, -transVector.x, -transVector.y, 0);
+    }
+}
 
 - (void)drawMarker:(const ocv_ar::Marker *)marker {
     // set matrixes
+//    float mat[16];
+//    copyMatrix4(marker->getPoseMatPtr(), mat);
+//    
+//    GLKMatrix4 modelViewMat = GLKMatrix4MakeWithArray(mat);
+    
+    GLKMatrix4 modelViewMat = [self updateModelViewMat:marker WithTapAtX:deltaX Y:deltaY];
+    modelViewMat = GLKMatrix4Rotate(modelViewMat, 3.14/3, 1, 0, 0);
+    
     glUniformMatrix4fv(shMarkerProjMat, 1, false, markerProjMat);
-    glUniformMatrix4fv(shMarkerModelViewMat, 1, false, marker->getPoseMatPtr());
+    glUniformMatrix4fv(shMarkerModelViewMat, 1, false, modelViewMat.m);
     glUniformMatrix4fv(shMarkerTransformMat, 1, false, markerScaleMat);
     
-//    int id = marker->getId();
-//    float idR = (float) ((id * id) % 1024);
-//    float idG = (float) ((id * id * id) % 1024);
-//    float idB = (float) ((id * id * id * id) % 1024);
-    
-//    float markerColor[] = { idR / 1024.0f,
-//        idG / 1024.0f,
-//        idB / 1024.0f,
-//        0.75f };
     float markerColor[] = { 1.0, 0, 0, 0.75f };
     glUniform4fv(shMarkerColor, 1, markerColor);
     
@@ -197,6 +230,9 @@ const GLfloat quadVertices[] = {
     
     // cleanup
     glDisableVertexAttribArray(shAttrPos);
+    
+    deltaX = 0;
+    deltaY = 0;
 }
 
 - (void)setupGL {

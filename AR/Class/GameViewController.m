@@ -500,6 +500,8 @@ void printFloatMat4x4(const float *m) {
     } else {
         Data *data = [NSKeyedUnarchiver unarchiveObjectWithData:receivedData];
         NSLog(@"%@: received tap from %@ tap at position (%f, %f)", senderDisplayName, TAG, data.x, data.y);
+        
+        [self.glView handleTapAtX:data.x Y:data.y];
     }
 }
 
