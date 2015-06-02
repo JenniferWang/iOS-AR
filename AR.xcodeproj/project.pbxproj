@@ -51,6 +51,7 @@
 		38C870771B08618A00256BE7 /* Storyboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 38C870761B08618A00256BE7 /* Storyboard.storyboard */; };
 		38C870841B08651400256BE7 /* GameViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 38C870821B08651400256BE7 /* GameViewController.xib */; };
 		38D9313E1B166B1800A579E6 /* MultipeerConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38D9313D1B166B1800A579E6 /* MultipeerConnectivity.framework */; };
+		38DF1F4C1B1D31E0006A3538 /* cube.c in Sources */ = {isa = PBXBuildFile; fileRef = 38DF1F4A1B1D31E0006A3538 /* cube.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -134,6 +135,9 @@
 		38C870761B08618A00256BE7 /* Storyboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Storyboard.storyboard; path = AR/Storyboard.storyboard; sourceTree = "<group>"; };
 		38C870821B08651400256BE7 /* GameViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GameViewController.xib; sourceTree = "<group>"; };
 		38D9313D1B166B1800A579E6 /* MultipeerConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MultipeerConnectivity.framework; path = System/Library/Frameworks/MultipeerConnectivity.framework; sourceTree = SDKROOT; };
+		38DF1F491B1D2524006A3538 /* lg_cocacola_can.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lg_cocacola_can.h; sourceTree = "<group>"; };
+		38DF1F4A1B1D31E0006A3538 /* cube.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cube.c; sourceTree = "<group>"; };
+		38DF1F4B1B1D31E0006A3538 /* cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cube.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +204,8 @@
 		38BBAC821B070E7B0017954A /* AR */ = {
 			isa = PBXGroup;
 			children = (
+				38DF1F4A1B1D31E0006A3538 /* cube.c */,
+				38DF1F4B1B1D31E0006A3538 /* cube.h */,
 				38BBACA91B0710300017954A /* Classes */,
 				38BBACE21B07108B0017954A /* Resources */,
 				38BBAC831B070E7B0017954A /* Supporting Files */,
@@ -298,6 +304,7 @@
 		38BBACE21B07108B0017954A /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				38DF1F491B1D2524006A3538 /* lg_cocacola_can.h */,
 				384B8B3B1B1029A10013AAB6 /* shaders */,
 				38BBACE31B07108B0017954A /* cam-intrinsics */,
 				38BBACE51B07108B0017954A /* InfoPlist.strings */,
@@ -461,6 +468,7 @@
 				38BBAD441B0716950017954A /* tools.cpp in Sources */,
 				38BBAD481B07C62E0017954A /* EntryViewController.m in Sources */,
 				38BBAD431B0716950017954A /* threading.cpp in Sources */,
+				38DF1F4C1B1D31E0006A3538 /* cube.c in Sources */,
 				38BBAC861B070E7B0017954A /* main.m in Sources */,
 				38BBACB91B0710300017954A /* shader.cpp in Sources */,
 				38BBAD3F1B0716950017954A /* ident_templ.cpp in Sources */,
@@ -616,7 +624,7 @@
 					"$(PROJECT_NAME)/AR/Libraries",
 				);
 				INFOPLIST_FILE = AR/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -646,7 +654,7 @@
 					"$(PROJECT_NAME)/AR/Libraries",
 				);
 				INFOPLIST_FILE = AR/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

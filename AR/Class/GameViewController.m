@@ -147,13 +147,12 @@ void printFloatMat4x4(const float *m) {
     baseView = [[UIView alloc] initWithFrame:baseFrame];
     
     // create the image view for the camera frames
-    camView = [[CamView alloc] initWithFrame:baseFrame];
-//    CGRect camFrame = CGRectMake(0, 0, screenRect.size.width, screenRect.size.height);
-//    camView = [[CamView alloc] initWithFrame:camFrame];
+    CGRect camFrame = CGRectMake(0, 0, screenRect.size.width, screenRect.size.height);
+    camView = [[CamView alloc] initWithFrame:camFrame];
     [baseView addSubview:camView];
     
     // create view for processed frames
-    procFrameView = [[UIImageView alloc] initWithFrame:baseFrame];
+    procFrameView = [[UIImageView alloc] initWithFrame:camFrame];
     [procFrameView setHidden:YES];  // initially hidden
     [baseView addSubview:procFrameView];
     

@@ -10,6 +10,8 @@
  */
 
 #import "GLView.h"
+#import "lg_cocacola_can.h"
+#import "cube.h"
 
 #define QUAD_VERTICES 				4
 #define QUAD_COORDS_PER_VERTEX      3
@@ -73,7 +75,7 @@ const GLfloat quadVertices[] = {
         markerProjMat = NULL;
         
         memset(markerScaleMat, 0, sizeof(GLfloat) * 16);
-        [self setMarkerScale:1.0f];
+        [self setMarkerScale:2.0f];
         
         // add the render method of our GLView to the main run loop in order to
         // render every frame periodically
@@ -169,15 +171,16 @@ const GLfloat quadVertices[] = {
     glUniformMatrix4fv(shMarkerModelViewMat, 1, false, marker->getPoseMatPtr());
     glUniformMatrix4fv(shMarkerTransformMat, 1, false, markerScaleMat);
     
-    int id = marker->getId();
-    float idR = (float) ((id * id) % 1024);
-    float idG = (float) ((id * id * id) % 1024);
-    float idB = (float) ((id * id * id * id) % 1024);
+//    int id = marker->getId();
+//    float idR = (float) ((id * id) % 1024);
+//    float idG = (float) ((id * id * id) % 1024);
+//    float idB = (float) ((id * id * id * id) % 1024);
     
-    float markerColor[] = { idR / 1024.0f,
-        idG / 1024.0f,
-        idB / 1024.0f,
-        0.75f };
+//    float markerColor[] = { idR / 1024.0f,
+//        idG / 1024.0f,
+//        idB / 1024.0f,
+//        0.75f };
+    float markerColor[] = { 1.0, 0, 0, 0.75f };
     glUniform4fv(shMarkerColor, 1, markerColor);
     
     // set geometry
@@ -187,10 +190,10 @@ const GLfloat quadVertices[] = {
                           GL_FLOAT,
                           GL_FALSE,
                           0,
-                          quadVertices);
+                          cubePositions);
     
     // draw
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, QUAD_VERTICES);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, cubeVertices);
     
     // cleanup
     glDisableVertexAttribArray(shAttrPos);
