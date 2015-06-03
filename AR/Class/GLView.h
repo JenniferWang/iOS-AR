@@ -1,12 +1,12 @@
 /**
- * OcvARBasicNativeCam - Basic ocv_ar example for iOS with native camera usage
+ * Based on OcvARBasicNativeCam - Basic ocv_ar example for iOS with native camera usage 
+ * by  Markus Konrad <konrad@htw-berlin.de>, June 2014, 
+ * INKA Research Group, HTW Berlin - http://inka.htw-berlin.de/
+ * BSD licensed (see LICENSE file).
  *
  * gl view - header file.
  *
- * Author: Markus Konrad <konrad@htw-berlin.de>, June 2014.
- * INKA Research Group, HTW Berlin - http://inka.htw-berlin.de/
- *
- * BSD licensed (see LICENSE file).
+ * Modified by Jiyue Wang
  */
 
 #import <UIKit/UIKit.h>
@@ -38,9 +38,11 @@ using namespace std;
     CGSize viewportSize;        // real gl viewport size in pixels
     
     GLfloat markerScaleMat[16]; // global marker transform (scale) matrix
+    
+    GLfloat color[3];
+    GLKMatrix4 markerModelViewMat;
+    GLKMatrix4 markerProjectionMat; // kind of duplicate of markerProjMat
 
-    GLfloat deltaX;             // object translation along x axis
-    GLfloat deltaY;             // object translation along y axis
 }
 
 @property (nonatomic, assign) ocv_ar::Track *tracker;   // tracker object that handles marker tracking and motion interpolation
@@ -64,6 +66,12 @@ using namespace std;
  */
 - (void)render:(CADisplayLink *)displayLink;
 
-- (void)handleTapAtX:(float) x Y:(float) y;
+//- (void)handleTapAtX:(float) x Y:(float) y;
+
+// now only support one object
+- (BOOL)intersectAtX:(float)x Y:(float)y;
+
+- (void)handleColorVectorX:(float)colorX Y:(float)colorY Z:(float)colorZ;
+
 
 @end

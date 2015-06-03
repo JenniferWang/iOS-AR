@@ -1,12 +1,13 @@
 /**
- * OcvARBasicNativeCam - Basic ocv_ar example for iOS with native camera usage
+ * Based on OcvARBasicNativeCam - Basic ocv_ar example for iOS with native camera usage
+ * by  Markus Konrad <konrad@htw-berlin.de>, June 2014,
+ * INKA Research Group, HTW Berlin - http://inka.htw-berlin.de/
+ * BSD licensed (see LICENSE file).
+ * gl view - implementation file.
  *
  * Main view controller - header file.
  *
- * Author: Markus Konrad <konrad@htw-berlin.de>, June 2014.
- * INKA Research Group, HTW Berlin - http://inka.htw-berlin.de/
- *
- * BSD licensed (see LICENSE file).
+ * Modified by Jiyue Wang
  */
 
 #import <UIKit/UIKit.h>

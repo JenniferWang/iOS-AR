@@ -1,12 +1,14 @@
 /**
- * OcvARBasicNativeCam - Basic ocv_ar example for iOS with native camera usage
- *
+ * Based on OcvARBasicNativeCam - Basic ocv_ar example for iOS with native camera usage
+ * by  Markus Konrad <konrad@htw-berlin.de>, June 2014,
+ * INKA Research Group, HTW Berlin - http://inka.htw-berlin.de/
+ * BSD licensed (see LICENSE file).
+ * gl view - implementation file.
+ * 
  * Main view controller - implementation file.
  *
- * Author: Markus Konrad <konrad@htw-berlin.de>, June 2014.
- * INKA Research Group, HTW Berlin - http://inka.htw-berlin.de/
+ * Modified by Jiyue Wang
  *
- * BSD licensed (see LICENSE file).
  */
 
 #import "GameViewController.h"
@@ -452,11 +454,22 @@ void printFloatMat4x4(const float *m) {
         CGPoint pos = [sender locationInView:sender.view];
         NSLog(@"%@: tap at position (%f, %f)", TAG, pos.x, pos.y);
         
+        if (![self.glView intersectAtX:pos.x Y:pos.y]) {
+            return;
+        }
+        
+        // generate a color randomly
+        float r = (arc4random() % 255) / 255.0;
+        float g = (arc4random() % 255) / 255.0;
+        float b = (arc4random() % 255) / 255.0;
+        
+        [self.glView handleColorVectorX:r Y:g Z:b];
+
         if ( !isMultiMode ) {
             return;
         }
         
-        Data *data = [[Data alloc]init:[sender locationInView:sender.view]];
+        Data *data = [[Data alloc]initWithColorX:r Y:g Z:b];
         NSData *preparedData = [NSKeyedArchiver archivedDataWithRootObject:data];
         NSError *error = nil;
         [self.appDelegate.mpcHandler.session sendData:preparedData
@@ -499,9 +512,8 @@ void printFloatMat4x4(const float *m) {
         }
     } else {
         Data *data = [NSKeyedUnarchiver unarchiveObjectWithData:receivedData];
-        NSLog(@"%@: received tap from %@ tap at position (%f, %f)", senderDisplayName, TAG, data.x, data.y);
-        
-        [self.glView handleTapAtX:data.x Y:data.y];
+        NSLog(@"%@: received color from %@ tap at position (%f, %f, %f)", TAG, senderDisplayName, data.colorX, data.colorY, data.colorZ);
+        [self.glView handleColorVectorX:data.colorX Y:data.colorY Z:data.colorZ];
     }
 }
 

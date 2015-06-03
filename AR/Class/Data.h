@@ -11,8 +11,9 @@
 
 @interface Data : NSObject 
 
-@property(nonatomic) float x;
-@property(nonatomic) float y;
+@property(nonatomic) float colorX;
+@property(nonatomic) float colorY;
+@property(nonatomic) float colorZ;
 
--(id)init:(CGPoint)point;
+-(id)initWithColorX:(float)x Y:(float)y Z:(float)z;
 @end

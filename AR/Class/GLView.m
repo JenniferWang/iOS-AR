@@ -1,12 +1,12 @@
 /**
- * OcvARBasicNativeCam - Basic ocv_ar example for iOS with native camera usage
+ * Based on OcvARBasicNativeCam - Basic ocv_ar example for iOS with native camera usage
+ * by  Markus Konrad <konrad@htw-berlin.de>, June 2014,
+ * INKA Research Group, HTW Berlin - http://inka.htw-berlin.de/
+ * BSD licensed (see LICENSE file).
  *
  * gl view - implementation file.
  *
- * Author: Markus Konrad <konrad@htw-berlin.de>, June 2014.
- * INKA Research Group, HTW Berlin - http://inka.htw-berlin.de/
- *
- * BSD licensed (see LICENSE file).
+ * Modified by Jiyue Wang, Shaohan Xu
  */
 
 #import "GLView.h"
@@ -29,27 +29,21 @@ void copyMatrix4(const float *input, float* output) {
 }
 
 @interface GLView(Private)
-/**
- * set up OpenGL
- */
+
 - (void)setupGL;
 
-/**
- * initialize shaders
- */
 - (void)initShaders;
 
-/**
- * build a shader <shader> from source <src>
- */
 - (BOOL)buildShader:(Shader *)shader src:(NSString *)src;
 
-/**
- * draw a <marker>
- */
 - (void)drawMarker:(const ocv_ar::Marker *)marker;
 
 - (GLKMatrix4)updateModelViewMat: (const ocv_ar::Marker *)marker WithTapAtX:(float) x Y:(float) y;
+
+- (BOOL)unProjectAtWinPos:(const GLKVector3 &)winpos WithModelViewMat:(const GLKMatrix4 &)modelViewMat ProjectMat:(const GLKMatrix4 &)projMat ObjectPos:(GLKVector3 &)objectPos;
+
+- (BOOL)getObjectPost:(GLKVector3 &)objectPos RecivedTapAt:(CGPoint)tapPos WithModelViewMat:(const GLKMatrix4 &)modelViewMat ProjectMat:(const GLKMatrix4 &) projMat;
+
 @end
 
 
@@ -76,6 +70,9 @@ void copyMatrix4(const float *input, float* output) {
         showMarkers = YES;
         
         markerProjMat = NULL;
+        color[0] = 0.0;
+        color[1] = 0.0;
+        color[2] = 0.0;
         
         memset(markerScaleMat, 0, sizeof(GLfloat) * 16);
         [self setMarkerScale:2.0f];
@@ -93,15 +90,12 @@ void copyMatrix4(const float *input, float* output) {
         [self setDrawableDepthFormat:GLKViewDrawableDepthFormat24];
         [self setDrawableStencilFormat:GLKViewDrawableStencilFormat8];
         
-        deltaX = 0;
-        deltaY = 0;
     }
     
     return self;
 }
 
 #pragma mark parent methods
-
 - (void)drawRect:(CGRect)rect {
     if (!glInitialized) return;
     
@@ -154,6 +148,13 @@ void copyMatrix4(const float *input, float* output) {
 
 #pragma mark public methods
 
+- (void)handleColorVectorX:(float)colorX Y:(float)colorY Z:(float)colorZ {
+    
+    color[0] = colorX;
+    color[1] = colorY;
+    color[2] = colorZ;
+    
+}
 - (void)render:(CADisplayLink *)displayLink {
     [self display];
 }
@@ -169,51 +170,82 @@ void copyMatrix4(const float *input, float* output) {
     markerScaleMat[15] = 1.0f;
 }
 
-- (void)handleTapAtX:(float) x Y:(float) y {
-    deltaX = x;
-    deltaY = y;
+- (BOOL)intersectAtX:(float)x Y:(float)y;{
+    
+    if (!self.markerProjMat) {
+        return NO;
+    }
+    const ocv_ar::MarkerMap *markers = tracker->getMarkers();
+    if (markers->empty()) {
+        return NO;
+    }
+    
+    // currently only support one object
+    GLKVector3 bojectPos;
+    return [self getObjectPost:bojectPos RecivedTapAt:CGPointMake(x, y) WithModelViewMat:
+            markerModelViewMat ProjectMat:markerProjectionMat];
+    
 }
 
-
 #pragma mark private methods
-// BUGGY
-- (GLKMatrix4)updateModelViewMat: (const ocv_ar::Marker *)marker WithTapAtX:(float) x Y:(float) y {
+
+- (BOOL)getObjectPost:(GLKVector3 &)objectPos RecivedTapAt:(CGPoint)tapPos WithModelViewMat:(const GLKMatrix4 &)modelViewMat ProjectMat:(const GLKMatrix4 &) projMat  {
     
-    float mat[16];
-    copyMatrix4(marker->getPoseMatPtr(), mat);
+    GLKVector3 winPos = GLKVector3Make(tapPos.x, viewportSize.height - tapPos.y, 1.0);
+    return [self unProjectAtWinPos:winPos WithModelViewMat:modelViewMat ProjectMat:projMat ObjectPos:objectPos];
+}
+
+// TODO: not returning the correct decision
+- (BOOL)unProjectAtWinPos:(const GLKVector3 &)winpos WithModelViewMat:(const GLKMatrix4 &)modelViewMat ProjectMat:(const GLKMatrix4 &)projMat ObjectPos:(GLKVector3 &)objectPos {
     
-    GLKMatrix4 modelViewMat = GLKMatrix4MakeWithArray(mat);
-    GLKMatrix4 projMat = GLKMatrix4MakeWithArray(markerProjMat);
-    GLKMatrix4 projXModelViewMat = GLKMatrix4Multiply(projMat, modelViewMat);
+    //Transformation matrices
+    bool isInvertible;
+    GLKVector4 inVec, outVec;
+    GLKVector4 viewPort = GLKVector4Make(0.0, 0.0, viewportSize.width, viewportSize.height);
     
-    bool *isInvertible = nil;
-    GLKMatrix4 invModelViewMat = GLKMatrix4Invert(projXModelViewMat, isInvertible);
-    if (isInvertible != nil) {
-        NSLog(@"%@: projection * modelView is singular, return previous model view matrix", TAG);
-        return modelViewMat;
-    }else {
-        GLKVector4 tapVector = GLKVector4Make(x, y, 0, 1);
-        GLKVector4 transVector = GLKMatrix4MultiplyVector4(invModelViewMat, tapVector);
-        NSLog(@"%@: got translation vector (%f, %f, %f, %f)", TAG, transVector.x, transVector.y, transVector.z, transVector.w  );
-        return GLKMatrix4Translate(modelViewMat, -transVector.x, -transVector.y, 0);
+    //Calculation for inverting a matrix, compute projection x modelview
+    //and store in A[16]
+    GLKMatrix4 A = GLKMatrix4Multiply(projMat, modelViewMat);
+    GLKMatrix4 inverse = GLKMatrix4Invert(A, &isInvertible);
+    
+    if (!isInvertible) {
+        NSLog(@"%@: matrix not invertible", TAG);
+        return NO;
     }
+    inVec.x = (winpos.x - viewPort.x) / viewPort.z * 2.0 - 1.0;
+    inVec.y = (winpos.y - viewPort.y) / viewPort.w * 2.0 - 1.0;
+    inVec.z = 2.0 * winpos.z - 1.0;
+    inVec.w = 1.0;
+
+    //Objects coordinates
+    outVec = GLKMatrix4MultiplyVector4(inverse, inVec);
+    if (outVec.w == (GLfloat)0.0) {
+        NSLog(@"%@: w is 0", TAG);
+        return NO;
+    }
+    outVec.w = 1.0 / outVec.w;
+    objectPos.x = outVec.x * outVec.w;
+    objectPos.y = outVec.y * outVec.w;
+    objectPos.z = outVec.z * outVec.z;
+    
+    NSLog(@"%@: object pos at (%f, %f, %f)", TAG, objectPos.x, objectPos.y, objectPos.z);
+    
+    return YES;
 }
 
 - (void)drawMarker:(const ocv_ar::Marker *)marker {
-    // set matrixes
-//    float mat[16];
-//    copyMatrix4(marker->getPoseMatPtr(), mat);
-//    
-//    GLKMatrix4 modelViewMat = GLKMatrix4MakeWithArray(mat);
-    
-    GLKMatrix4 modelViewMat = [self updateModelViewMat:marker WithTapAtX:deltaX Y:deltaY];
-    modelViewMat = GLKMatrix4Rotate(modelViewMat, 3.14/3, 1, 0, 0);
-    
+
+    // update transform matrixes
+    float mat[16];
+    copyMatrix4(marker->getPoseMatPtr(), mat);
+    markerModelViewMat = GLKMatrix4MakeWithArray(mat);
+    markerProjectionMat = GLKMatrix4MakeWithArray(markerProjMat);
+
     glUniformMatrix4fv(shMarkerProjMat, 1, false, markerProjMat);
-    glUniformMatrix4fv(shMarkerModelViewMat, 1, false, modelViewMat.m);
+    glUniformMatrix4fv(shMarkerModelViewMat, 1, false, markerModelViewMat.m);
     glUniformMatrix4fv(shMarkerTransformMat, 1, false, markerScaleMat);
     
-    float markerColor[] = { 1.0, 0, 0, 0.75f };
+    float markerColor[] = { color[0], color[1], color[2], 0.75f };
     glUniform4fv(shMarkerColor, 1, markerColor);
     
     // set geometry
@@ -230,9 +262,7 @@ void copyMatrix4(const float *input, float* output) {
     
     // cleanup
     glDisableVertexAttribArray(shAttrPos);
-    
-    deltaX = 0;
-    deltaY = 0;
+
 }
 
 - (void)setupGL {
