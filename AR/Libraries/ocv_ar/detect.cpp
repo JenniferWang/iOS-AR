@@ -20,6 +20,42 @@
 
 using namespace ocv_ar;
 
+#pragma helper function
+
+// todo
+int erosion_elem = 0;
+int erosion_size = 1;
+
+int dilation_elem = 0;
+int dilation_size = 0;
+
+void Erosion( cv::Mat& input, cv::Mat& output )
+{
+    int erosion_type;
+    if( erosion_elem == 0 ){ erosion_type = cv::MORPH_RECT; }
+    else if( erosion_elem == 1 ){ erosion_type = cv::MORPH_CROSS; }
+    else if( erosion_elem == 2) { erosion_type = cv::MORPH_ELLIPSE; }
+    
+    cv::Mat element = getStructuringElement( erosion_type,
+                                        cv::Size( 2 * erosion_size + 1, 2 * erosion_size+1 ),
+                                        cv::Point( erosion_size, erosion_size ) );
+    /// Apply the erosion operation
+    cv::erode( input, output, element );
+}
+
+void Dilation( cv::Mat& input, cv::Mat& output )
+{
+    int dilation_type;
+    if( dilation_elem == 0 ){ dilation_type = cv::MORPH_RECT; }
+    else if( dilation_elem == 1 ){ dilation_type = cv::MORPH_CROSS; }
+    else if( dilation_elem == 2) { dilation_type = cv::MORPH_ELLIPSE; }
+    
+    cv::Mat element = getStructuringElement( dilation_type,
+                                        cv::Size( 2 * dilation_size + 1, 2 * dilation_size + 1 ),
+                                        cv::Point( dilation_size, dilation_size ) );
+    /// Apply the dilation operation
+    dilate( input, output, element );
+}
 
 #pragma mark public methods
 
@@ -291,14 +327,13 @@ void Detect::preprocess() {
 void Detect::performThreshold() {
     // perform thresholding
     
-	cv::adaptiveThreshold(*inFrame,
+    cv::adaptiveThreshold(*inFrame,
                           *procFrame,
                           255,
                           cv::ADAPTIVE_THRESH_MEAN_C, // ADAPTIVE_THRESH_GAUSSIAN_C
                           cv::THRESH_BINARY_INV,
                           OCV_AR_CONF_THRESH_BLOCK_SIZE,
                           OCV_AR_CONF_THRESH_C);
-    
     setOutputFrameOnCurProcLevel(PROC_LEVEL_THRESH, procFrame);
 }
 
