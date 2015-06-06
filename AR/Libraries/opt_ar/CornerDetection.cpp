@@ -1,8 +1,8 @@
-#include "ar/CornerDetection.hpp"
+#include "CornerDetection.h"
 
 using namespace cv;
 
-namespace ar
+namespace opt_ar
 {
 
 template<typename T> struct greaterThanPtr
@@ -32,8 +32,8 @@ void DetectGoodFeaturesToTrack(const GrayscaleImage& image,
     threshold(eig, eig, maxVal*qualityLevel, 0, THRESH_TOZERO);
     dilate(eig, tmp, Mat());
     
-    Size imgsize = image.size();
-    vector<const float*> tmpCorners;
+    cv::Size imgsize = image.size();
+    std::vector<const float*> tmpCorners;
     
     // Collect list of pointers to features - put them into temporary image.
     for( int y = 1; y < imgsize.height - 1; y++ )
@@ -50,8 +50,8 @@ void DetectGoodFeaturesToTrack(const GrayscaleImage& image,
         }
     }
     
-    sort(tmpCorners, greaterThanPtr<float>());
-    vector<Point2f> corners;
+    std::sort(tmpCorners.begin(), tmpCorners.end(), greaterThanPtr<float>());
+    std::vector<Point2f> corners;
     size_t i, j, total = tmpCorners.size(), ncorners = 0;
     
     if(minDistance >= 1)
@@ -94,7 +94,7 @@ void DetectGoodFeaturesToTrack(const GrayscaleImage& image,
             {
                 for( int xx = x1; xx <= x2; xx++ )
                 {
-                    vector <Point2f> &m = grid[yy*grid_width + xx];
+                    std::vector <Point2f> &m = grid[yy*grid_width + xx];
                     
                     if( m.size() )
                     {
@@ -115,8 +115,8 @@ void DetectGoodFeaturesToTrack(const GrayscaleImage& image,
             
         break_out:
             
-            if(good)
-            {
+            if(good){
+                
                 grid[y_cell*grid_width + x_cell].push_back(Point2f((float)x, (float)y));
                 
                 corners.push_back(Point2f((float)x, (float)y));

@@ -1,9 +1,9 @@
-#ifndef __Artsy__CornerDetection__
-#define __Artsy__CornerDetection__
+#ifndef __OpticalFlow__CornerDetection__
+#define __OpticalFlow__CornerDetection__
 
-#include "ar/Common.hpp"
+#include "Common.h"
 
-namespace ar
+namespace opt_ar
 {
 
 typedef std::function<void(const GrayscaleImage&, cv::Mat&, int)> HarrisCornerDetector;

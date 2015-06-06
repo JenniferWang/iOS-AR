@@ -1,16 +1,15 @@
-#include "ar/ORBTracker.hpp"
+#include "ORBTracker.h"
 #include <iostream>
 
 using namespace cv;
 using namespace std;
 
-namespace ar
+namespace opt_ar
 {
 
-static const char* TAG = "ORBTracker";
+    static const char* TAG = "ORBTracker";
 
-    ORBTracker::ORBTracker() {
-    }
+    ORBTracker::ORBTracker() {}
 
     // Initialize your tracking using the provided image.
     void ORBTracker::initialize(const GrayscaleImage& frame) {
@@ -24,16 +23,17 @@ static const char* TAG = "ORBTracker";
         int scoreType = ORB::HARRIS_SCORE;
         int patchSize = 31;
         
-        OrbFeatureDetector detector(nfeatures, scaleFactor, nlevels, edgeThreshold,
-                                    firstLevel, WTA_K, scoreType, patchSize);
-        
-        detector.detect(frame, ref_keyptrs_);
-        OrbDescriptorExtractor extractor;
-        extractor.compute(frame, ref_keyptrs_, ref_dscrptr_);
+        Ptr<ORB> detector = ORB::create(nfeatures, scaleFactor, nlevels, edgeThreshold,
+                                       firstLevel, WTA_K, scoreType, patchSize);
+
+        detector->detect(frame, ref_keyptrs_);
+        Ptr<DescriptorExtractor> extractor = DescriptorExtractor::create<DescriptorExtractor>("ORB");
+
+        extractor->compute(frame, ref_keyptrs_, ref_dscrptr_);
         
         frame.copyTo(ref_frame_);
         cout << "ORB initialized" << endl;
-        //LOG_DEBUG(TAG, "Initialized.");
+
     }
 
     // Initialize your tracking subsystem using the provided frame.
@@ -43,11 +43,11 @@ static const char* TAG = "ORBTracker";
         
         // Step 1: Detect ORB features.
         vector<KeyPoint> keyptrs;
-        detector.detect(frame, keyptrs);
+        detector->detect(frame, keyptrs);
         
-        OrbFeatureDetector extractor;
+        Ptr<DescriptorExtractor> extractor = DescriptorExtractor::create<DescriptorExtractor>("ORB");
         Mat dscrptr;
-        extractor.compute(frame, keyptrs, dscrptr);
+        extractor->compute(frame, keyptrs, dscrptr);
 
         // Step 2: Find matches (using Hamming distance).
         BFMatcher matcher = BFMatcher(NORM_HAMMING);

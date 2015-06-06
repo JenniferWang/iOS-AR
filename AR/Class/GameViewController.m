@@ -49,6 +49,8 @@ void printFloatMat4x4(const float *m) {
 
 - (BOOL)initDetector;
 
+//- (BOOL)initORBTracker;
+
 /**
  * Called on the first input frame and prepares everything for the specified
  * frame size and number of color channels
@@ -360,8 +362,7 @@ void printFloatMat4x4(const float *m) {
 - (BOOL)initDetector {
     
     cv::FileStorage fs;
-    const char *path = [[[NSBundle mainBundle] pathForResource:camIntrinsicsFile ofType:NULL]
-        cStringUsingEncoding:NSASCIIStringEncoding];
+    const char *path = [[[NSBundle mainBundle] pathForResource:camIntrinsicsFile ofType:NULL]cStringUsingEncoding:NSASCIIStringEncoding];
     
     if (!path) {
         NSLog(@"could not find cam intrinsics file %@", camIntrinsicsFile);
@@ -391,9 +392,31 @@ void printFloatMat4x4(const float *m) {
     }
     
     detector->setCamIntrinsics(camMat, distCoeff);
-    
+    //[self initORBTracker];
     return YES;
 }
+
+//-(BOOL)initORBTracker {
+//    
+//    const char *refPath = [[[NSBundle mainBundle] pathForResource:@"the-scream.jpg" ofType:NULL]cStringUsingEncoding:NSASCIIStringEncoding];
+//    
+//    if (!refPath) {
+//        NSLog(@"could not find reference image file %@", @"the-scream.jpg");
+//        return NO;
+//    }
+//    
+//    Mat rgbRef = imread(refPath);
+//    if (!rgbRef.data) {
+//        NSLog(@"OpenCV could not open reference image file %@", @"the-scream.jpg");
+//        return NO;
+//    
+//    }
+//    Mat gray;
+//    cvtColor(rgbRef, gray, COLOR_BGR2GRAY);
+//    orbTracker->initialize(gray);
+//    return YES;
+//}
+
 
 - (void)prepareForFramesOfSize:(CGSize)size numChannels:(int)chan {
     // WARNING: this method will not be called from the main thead!

@@ -16,6 +16,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 
 #include "ocv_ar.h"
+#include "opt_ar.h"
 
 #import "CamView.h"
 #import "GLView.h"
@@ -47,6 +48,8 @@
     
     ocv_ar::Detect *detector;   // ocv_ar::Detector for marker detection
     ocv_ar::Track *tracker;     // ocv_ar::Track for marker tracking and motion interpolation
+    
+    //opt_ar::ORBTracker *orbTracker;
     
     BOOL useDistCoeff;      // use distortion coefficients in camera intrinsics?
     BOOL isMultiMode;

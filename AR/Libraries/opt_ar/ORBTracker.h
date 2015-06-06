@@ -1,9 +1,9 @@
-#ifndef __Artsy__ORBTracker__
-#define __Artsy__ORBTracker__
+#ifndef __OpticalFlow__ORBTracker__
+#define __OpticalFlow__ORBTracker__
 
-#include "ar/Common.hpp"
+#include "Common.h"
 
-namespace ar
+namespace opt_ar
 {
 
 class ORBTracker
@@ -24,7 +24,7 @@ private:
     std::vector<cv::KeyPoint> ref_keyptrs_;
     
     cv::Mat ref_dscrptr_;
-    cv::OrbFeatureDetector detector;
+    cv::Ptr<cv::ORB> detector;
 };
 
 }

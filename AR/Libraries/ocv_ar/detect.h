@@ -196,7 +196,10 @@ private:
     void calcProjMat(float viewW, float viewH);
     
     
-    bool prepared;                  // detector is prepared (<prepare()> called)?
+    bool prepared;    
+
+
+                  // detector is prepared (<prepare()> called)?
     
     int inputFrameCvtType;          // color conversion type for input frames
     

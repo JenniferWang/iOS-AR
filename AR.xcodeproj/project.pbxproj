@@ -18,6 +18,11 @@
 		384B8B3E1B1029A10013AAB6 /* marker_f.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 384B8B3C1B1029A10013AAB6 /* marker_f.glsl */; };
 		384B8B3F1B1029A10013AAB6 /* marker_v.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 384B8B3D1B1029A10013AAB6 /* marker_v.glsl */; };
 		386C48871B128B3700662CBB /* ipad3-back.xml in Resources */ = {isa = PBXBuildFile; fileRef = 386C48861B128B3700662CBB /* ipad3-back.xml */; };
+		38846C241B22276000E447F6 /* ORBTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38846C221B22276000E447F6 /* ORBTracker.cpp */; };
+		38846C2B1B223D8800E447F6 /* KLTTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38846C291B223D8800E447F6 /* KLTTracker.cpp */; };
+		38846C351B22426E00E447F6 /* PlaneTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38846C331B22426E00E447F6 /* PlaneTracker.cpp */; };
+		38846C381B22501800E447F6 /* ImgMarker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38846C361B22501800E447F6 /* ImgMarker.cpp */; };
+		38846C3B1B2358D100E447F6 /* Tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38846C391B2358D100E447F6 /* Tools.cpp */; };
 		38BBAC861B070E7B0017954A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 38BBAC851B070E7B0017954A /* main.m */; };
 		38BBAC911B070E7B0017954A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 38BBAC901B070E7B0017954A /* Images.xcassets */; };
 		38BBAC941B070E7B0017954A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 38BBAC921B070E7B0017954A /* LaunchScreen.xib */; };
@@ -52,12 +57,7 @@
 		38C870841B08651400256BE7 /* GameViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 38C870821B08651400256BE7 /* GameViewController.xib */; };
 		38D9313E1B166B1800A579E6 /* MultipeerConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38D9313D1B166B1800A579E6 /* MultipeerConnectivity.framework */; };
 		38DF1F4C1B1D31E0006A3538 /* cube.c in Sources */ = {isa = PBXBuildFile; fileRef = 38DF1F4A1B1D31E0006A3538 /* cube.c */; };
-		38E027551B21642C00758699 /* ARApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38E027481B21642C00758699 /* ARApp.cpp */; };
-		38E027561B21642C00758699 /* Augmentor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38E0274A1B21642C00758699 /* Augmentor.cpp */; };
-		38E027571B21642C00758699 /* CornerDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38E0274D1B21642C00758699 /* CornerDetection.cpp */; };
-		38E027581B21642C00758699 /* KLTTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38E0274F1B21642C00758699 /* KLTTracker.cpp */; };
-		38E027591B21642C00758699 /* ORBTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38E027511B21642C00758699 /* ORBTracker.cpp */; };
-		38E0275A1B21642C00758699 /* PlaneTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38E027531B21642C00758699 /* PlaneTracker.cpp */; };
+		38DF27401B222657002720A9 /* the-scream.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 38DF273F1B222657002720A9 /* the-scream.jpg */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +88,19 @@
 		384B8B3C1B1029A10013AAB6 /* marker_f.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marker_f.glsl; sourceTree = "<group>"; };
 		384B8B3D1B1029A10013AAB6 /* marker_v.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marker_v.glsl; sourceTree = "<group>"; };
 		386C48861B128B3700662CBB /* ipad3-back.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "ipad3-back.xml"; sourceTree = "<group>"; };
+		38846C211B22276000E447F6 /* Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Common.h; path = AR/Libraries/opt_ar/Common.h; sourceTree = SOURCE_ROOT; };
+		38846C221B22276000E447F6 /* ORBTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ORBTracker.cpp; path = AR/Libraries/opt_ar/ORBTracker.cpp; sourceTree = SOURCE_ROOT; };
+		38846C231B22276000E447F6 /* ORBTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ORBTracker.h; path = AR/Libraries/opt_ar/ORBTracker.h; sourceTree = SOURCE_ROOT; };
+		38846C281B2227D100E447F6 /* opt_ar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = opt_ar.h; path = AR/Libraries/opt_ar/opt_ar.h; sourceTree = SOURCE_ROOT; };
+		38846C291B223D8800E447F6 /* KLTTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KLTTracker.cpp; path = AR/Libraries/opt_ar/KLTTracker.cpp; sourceTree = SOURCE_ROOT; };
+		38846C2A1B223D8800E447F6 /* KLTTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KLTTracker.h; path = AR/Libraries/opt_ar/KLTTracker.h; sourceTree = SOURCE_ROOT; };
+		38846C2F1B223E7500E447F6 /* opt_conf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = opt_conf.h; path = AR/Libraries/opt_ar/opt_conf.h; sourceTree = SOURCE_ROOT; };
+		38846C331B22426E00E447F6 /* PlaneTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlaneTracker.cpp; path = AR/Libraries/opt_ar/PlaneTracker.cpp; sourceTree = SOURCE_ROOT; };
+		38846C341B22426E00E447F6 /* PlaneTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlaneTracker.h; path = AR/Libraries/opt_ar/PlaneTracker.h; sourceTree = SOURCE_ROOT; };
+		38846C361B22501800E447F6 /* ImgMarker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImgMarker.cpp; path = AR/Libraries/opt_ar/ImgMarker.cpp; sourceTree = SOURCE_ROOT; };
+		38846C371B22501800E447F6 /* ImgMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImgMarker.h; path = AR/Libraries/opt_ar/ImgMarker.h; sourceTree = SOURCE_ROOT; };
+		38846C391B2358D100E447F6 /* Tools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tools.cpp; path = AR/Libraries/opt_ar/Tools.cpp; sourceTree = SOURCE_ROOT; };
+		38846C3A1B2358D100E447F6 /* Tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tools.h; path = AR/Libraries/opt_ar/Tools.h; sourceTree = SOURCE_ROOT; };
 		38BBAC801B070E7B0017954A /* AR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		38BBAC841B070E7B0017954A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		38BBAC851B070E7B0017954A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -144,19 +157,7 @@
 		38DF1F491B1D2524006A3538 /* lg_cocacola_can.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lg_cocacola_can.h; sourceTree = "<group>"; };
 		38DF1F4A1B1D31E0006A3538 /* cube.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cube.c; sourceTree = "<group>"; };
 		38DF1F4B1B1D31E0006A3538 /* cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cube.h; sourceTree = "<group>"; };
-		38E027481B21642C00758699 /* ARApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ARApp.cpp; sourceTree = "<group>"; };
-		38E027491B21642C00758699 /* ARApp.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ARApp.hpp; sourceTree = "<group>"; };
-		38E0274A1B21642C00758699 /* Augmentor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Augmentor.cpp; sourceTree = "<group>"; };
-		38E0274B1B21642C00758699 /* Augmentor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Augmentor.hpp; sourceTree = "<group>"; };
-		38E0274C1B21642C00758699 /* Common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Common.hpp; sourceTree = "<group>"; };
-		38E0274D1B21642C00758699 /* CornerDetection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CornerDetection.cpp; sourceTree = "<group>"; };
-		38E0274E1B21642C00758699 /* CornerDetection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CornerDetection.hpp; sourceTree = "<group>"; };
-		38E0274F1B21642C00758699 /* KLTTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KLTTracker.cpp; sourceTree = "<group>"; };
-		38E027501B21642C00758699 /* KLTTracker.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KLTTracker.hpp; sourceTree = "<group>"; };
-		38E027511B21642C00758699 /* ORBTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ORBTracker.cpp; sourceTree = "<group>"; };
-		38E027521B21642C00758699 /* ORBTracker.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ORBTracker.hpp; sourceTree = "<group>"; };
-		38E027531B21642C00758699 /* PlaneTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlaneTracker.cpp; sourceTree = "<group>"; };
-		38E027541B21642C00758699 /* PlaneTracker.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlaneTracker.hpp; sourceTree = "<group>"; };
+		38DF273F1B222657002720A9 /* the-scream.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "the-scream.jpg"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,8 +203,8 @@
 		38BBAC771B070E7B0017954A = {
 			isa = PBXGroup;
 			children = (
+				38DF27361B221B69002720A9 /* opt_ar */,
 				38BBAD241B0716950017954A /* ocv_ar */,
-				38E027471B21642C00758699 /* feature-tracking */,
 				38BBAC821B070E7B0017954A /* AR */,
 				38C870761B08618A00256BE7 /* Storyboard.storyboard */,
 				38BBAC9C1B070E7B0017954A /* ARTests */,
@@ -324,6 +325,7 @@
 		38BBACE21B07108B0017954A /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				38DF273F1B222657002720A9 /* the-scream.jpg */,
 				38DF1F491B1D2524006A3538 /* lg_cocacola_can.h */,
 				384B8B3B1B1029A10013AAB6 /* shaders */,
 				38BBACE31B07108B0017954A /* cam-intrinsics */,
@@ -369,25 +371,25 @@
 			path = AR/Libraries/ocv_ar;
 			sourceTree = "<group>";
 		};
-		38E027471B21642C00758699 /* feature-tracking */ = {
+		38DF27361B221B69002720A9 /* opt_ar */ = {
 			isa = PBXGroup;
 			children = (
-				38E027481B21642C00758699 /* ARApp.cpp */,
-				38E027491B21642C00758699 /* ARApp.hpp */,
-				38E0274A1B21642C00758699 /* Augmentor.cpp */,
-				38E0274B1B21642C00758699 /* Augmentor.hpp */,
-				38E0274C1B21642C00758699 /* Common.hpp */,
-				38E0274D1B21642C00758699 /* CornerDetection.cpp */,
-				38E0274E1B21642C00758699 /* CornerDetection.hpp */,
-				38E0274F1B21642C00758699 /* KLTTracker.cpp */,
-				38E027501B21642C00758699 /* KLTTracker.hpp */,
-				38E027511B21642C00758699 /* ORBTracker.cpp */,
-				38E027521B21642C00758699 /* ORBTracker.hpp */,
-				38E027531B21642C00758699 /* PlaneTracker.cpp */,
-				38E027541B21642C00758699 /* PlaneTracker.hpp */,
+				38846C211B22276000E447F6 /* Common.h */,
+				38846C231B22276000E447F6 /* ORBTracker.h */,
+				38846C221B22276000E447F6 /* ORBTracker.cpp */,
+				38846C2A1B223D8800E447F6 /* KLTTracker.h */,
+				38846C291B223D8800E447F6 /* KLTTracker.cpp */,
+				38846C341B22426E00E447F6 /* PlaneTracker.h */,
+				38846C331B22426E00E447F6 /* PlaneTracker.cpp */,
+				38846C371B22501800E447F6 /* ImgMarker.h */,
+				38846C361B22501800E447F6 /* ImgMarker.cpp */,
+				38846C281B2227D100E447F6 /* opt_ar.h */,
+				38846C2F1B223E7500E447F6 /* opt_conf.h */,
+				38846C391B2358D100E447F6 /* Tools.cpp */,
+				38846C3A1B2358D100E447F6 /* Tools.h */,
 			);
-			name = "feature-tracking";
-			path = "AR/Libraries/feature-tracking";
+			name = opt_ar;
+			path = AR/Libraries/OpitcalFlow;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -473,6 +475,7 @@
 			files = (
 				38BBACE91B07108B0017954A /* InfoPlist.strings in Resources */,
 				384B8B3F1B1029A10013AAB6 /* marker_v.glsl in Resources */,
+				38DF27401B222657002720A9 /* the-scream.jpg in Resources */,
 				38BBAC941B070E7B0017954A /* LaunchScreen.xib in Resources */,
 				38C870841B08651400256BE7 /* GameViewController.xib in Resources */,
 				38BBACE81B07108B0017954A /* ipad3-front.xml in Resources */,
@@ -502,28 +505,27 @@
 				384B8B351B10158A0013AAB6 /* CamView.m in Sources */,
 				38BBAD3C1B0716950017954A /* detect.cpp in Sources */,
 				38BBAD3E1B0716950017954A /* ident_7x7.cpp in Sources */,
-				38E027571B21642C00758699 /* CornerDetection.cpp in Sources */,
-				38E027591B21642C00758699 /* ORBTracker.cpp in Sources */,
-				38E0275A1B21642C00758699 /* PlaneTracker.cpp in Sources */,
 				383BB4691B15828D000CDB85 /* MPCHandler.m in Sources */,
+				38846C351B22426E00E447F6 /* PlaneTracker.cpp in Sources */,
 				38BBACB71B0710300017954A /* AppDelegate.m in Sources */,
+				38846C3B1B2358D100E447F6 /* Tools.cpp in Sources */,
 				38BBACBA1B0710300017954A /* Tools.m in Sources */,
-				38E027551B21642C00758699 /* ARApp.cpp in Sources */,
 				38BBAD451B0716950017954A /* track.cpp in Sources */,
 				38BBAD441B0716950017954A /* tools.cpp in Sources */,
 				38BBAD481B07C62E0017954A /* EntryViewController.m in Sources */,
-				38E027561B21642C00758699 /* Augmentor.cpp in Sources */,
 				38BBAD431B0716950017954A /* threading.cpp in Sources */,
+				38846C2B1B223D8800E447F6 /* KLTTracker.cpp in Sources */,
 				38DF1F4C1B1D31E0006A3538 /* cube.c in Sources */,
+				38846C381B22501800E447F6 /* ImgMarker.cpp in Sources */,
 				38BBAC861B070E7B0017954A /* main.m in Sources */,
 				38BBACB91B0710300017954A /* shader.cpp in Sources */,
 				38BBAD3F1B0716950017954A /* ident_templ.cpp in Sources */,
 				384B8B381B1015970013AAB6 /* GameViewController.m in Sources */,
+				38846C241B22276000E447F6 /* ORBTracker.cpp in Sources */,
 				383BB46D1B158F76000CDB85 /* ConnectionViewController.m in Sources */,
 				38BBAD411B0716950017954A /* marker.cpp in Sources */,
 				3835C7B21B1AB4DF00B8291E /* Data.m in Sources */,
 				38BBAD3D1B0716950017954A /* ident.cpp in Sources */,
-				38E027581B21642C00758699 /* KLTTracker.cpp in Sources */,
 				384B8B321B10157E0013AAB6 /* GLView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -667,7 +669,6 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					/usr/local/opt/opencv/lib,
 					"$(PROJECT_NAME)/AR/Libraries",
 				);
 				INFOPLIST_FILE = AR/Info.plist;
@@ -697,7 +698,6 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					/usr/local/opt/opencv/lib,
 					"$(PROJECT_NAME)/AR/Libraries",
 				);
 				INFOPLIST_FILE = AR/Info.plist;
