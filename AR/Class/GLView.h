@@ -73,5 +73,6 @@ using namespace std;
 
 - (void)handleColorVectorX:(float)colorX Y:(float)colorY Z:(float)colorZ;
 
+- (NSUInteger) findColorWithTapAtX:(float) x Y:(float) y;
 
 @end

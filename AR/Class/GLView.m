@@ -146,6 +146,15 @@ void copyMatrix4(const float *input, float* output) {
     [self setNeedsDisplay];
 }
 
+- (NSUInteger) findColorWithTapAtX:(float) x Y:(float) y {
+    
+    Byte pixelColor[4] = {0,};
+    CGFloat scale = UIScreen.mainScreen.scale;
+    glReadPixels(x * scale, (viewportSize.height - (y * scale)), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixelColor);
+    
+    return pixelColor[0];
+}
+
 #pragma mark public methods
 
 - (void)handleColorVectorX:(float)colorX Y:(float)colorY Z:(float)colorZ {
@@ -155,6 +164,8 @@ void copyMatrix4(const float *input, float* output) {
     color[2] = colorZ;
     
 }
+
+
 - (void)render:(CADisplayLink *)displayLink {
     [self display];
 }

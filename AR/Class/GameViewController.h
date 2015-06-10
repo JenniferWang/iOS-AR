@@ -55,6 +55,10 @@
     BOOL isMultiMode;
     BOOL isGameRunning;
     BOOL isHost;
+    
+    float r;
+    float g;
+    float b;
 }
 
 @property (nonatomic, readonly) GLView *glView;  // gl view displays the highlighted markers

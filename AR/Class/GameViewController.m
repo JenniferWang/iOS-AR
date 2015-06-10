@@ -107,6 +107,7 @@ void printFloatMat4x4(const float *m) {
     }
 
     //NSLog(@"%@: initWithNibName finished", TAG);
+    r = 0;
     return self;
 }
 
@@ -481,12 +482,19 @@ void printFloatMat4x4(const float *m) {
             return;
         }
         
-        // generate a color randomly
-        float r = (arc4random() % 255) / 255.0;
-        float g = (arc4random() % 255) / 255.0;
-        float b = (arc4random() % 255) / 255.0;
+        // get color from glview
+        Byte color = [glView findColorWithTapAtX:pos.x Y:pos.y];
+        NSLog(@"%@: color is %hhu", TAG, color);
+        NSLog(@"%@: r is %f", TAG, r * 255);
         
-        [self.glView handleColorVectorX:r Y:g Z:b];
+        if (r * 255 == color) {
+            // generate a color randomly
+            r = (arc4random() % 255) / 255.0;
+            g = (arc4random() % 255) / 255.0;
+            b = (arc4random() % 255) / 255.0;
+            
+            [self.glView handleColorVectorX:r Y:g Z:b];
+        }
 
         if ( !isMultiMode ) {
             return;
