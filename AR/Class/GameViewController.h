@@ -15,9 +15,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
-#include "ocv_ar.h"
-#include "opt_ar.h"
-
+#import "Tracker.h"
 #import "CamView.h"
 #import "GLView.h"
 
@@ -35,6 +33,8 @@
 @interface GameViewController : UIViewController<AVCaptureVideoDataOutputSampleBufferDelegate> {
     
     NSString *camIntrinsicsFile;                // camera intrinsics file to use
+    NSString *imgTrackerRefFile;
+    
     AVCaptureSession *camSession;               // controlls the camera session
     AVCaptureDeviceInput *camDeviceInput;       // input device: camera
     AVCaptureVideoDataOutput *vidDataOutput;    // controlls the video output
@@ -46,10 +46,7 @@
     UIImageView *procFrameView; // view for processed frames
     CamView *camView;           // shows the grabbed video frames ("camera preview")
     
-    ocv_ar::Detect *detector;   // ocv_ar::Detector for marker detection
-    ocv_ar::Track *tracker;     // ocv_ar::Track for marker tracking and motion interpolation
-    
-    //opt_ar::ORBTracker *orbTracker;
+    Tracker *tracker;
     
     BOOL useDistCoeff;      // use distortion coefficients in camera intrinsics?
     BOOL isMultiMode;

@@ -15,16 +15,39 @@ namespace opt_ar
     void PlaneTracker::initialize(const ColorImage &frame) {
         int max_points = 8000;
         cv::Size win_size = cv::Size(5, 5);
-        
+
+        refFrame = new Mat();
+        if(!refFrame) {
+            printf("%s: reference frame cannot be initiallized\n", TAG);
+            exit(EXIT_FAILURE);
+        }
         cv::cvtColor(frame, *refFrame, cv::COLOR_RGBA2GRAY);
         
         kltTracker = KLTTracker(max_points, win_size);
         kltTracker.initialize(*refFrame);
         orbTracker.initialize(*refFrame);
-        isLost = true;
+        
+        inputFrameW = frame.cols;
+        inputFrameH = frame.rows;
+        
+        procFrame = new Mat(inputFrameW, inputFrameW, CV_8UC1);
+        outFrame = new Mat(inputFrameW, inputFrameW, CV_8UC1);
+        inFrameOrigGray = new Mat(inputFrameW, inputFrameW, CV_8UC1);
+        
+        if (!procFrame || !outFrame || !inFrameOrigGray) {
+            printf("%s: proc/out/inFrame cannot be initiallized\n", TAG);
+            exit(EXIT_FAILURE);
+        }
+        
+        calcFrameBounds(inputFrameH, inputFrameW);
         internalH = Homography(1, 0, 0,
-                                 0, 1, 0,
-                                 0, 0, 1);
+                               0, 1, 0,
+                               0, 0, 1);
+        
+        foundMarker = new ImgMarker(frameBounds);
+        isLost = true;
+        
+        markerScale = OPT_AR_CONF_DEFAULT_MARKER_SIZE_REAL;
         printf("%s: initialization finished", TAG);
     }
 
@@ -32,9 +55,53 @@ namespace opt_ar
         if (refFrame) delete refFrame;
         if (procFrame) delete procFrame;
         if (outFrame) delete outFrame;
+        if (inFrameOrigGray) delete inFrameOrigGray;
+        if (foundMarker) delete foundMarker;
+        
     }
     
 #pragma mark - public methods
+    // Implement the tracking logic as described on the project page.
+    // Your implementation should follow the logic described in the flowchart.
+    bool PlaneTracker::track()
+    {
+        bool estimation_successful = false;
+        MatchHandler match_handler = [&](const PointArray& src_points, const PointArray& dst_points) {
+            assert(src_points.size() == dst_points.size());
+            if(dst_points.size()>=4) {
+                estimation_successful = this->estimateHomography(src_points, dst_points, currentH);
+            }
+            else {
+                std::cout << "Tracker provided less than 4 correspondences for homography estimation!" << std::endl;
+            }
+        };
+        
+        if (!isLost) {
+            kltTracker.track(*inFrameOrigGray, match_handler);
+        }
+        
+        if (!estimation_successful || isLost) {
+            internalH = Homography(1, 0, 0,
+                                   0, 1, 0,
+                                   0, 0, 1);
+            orbTracker.track(*inFrameOrigGray, match_handler);
+            if (estimation_successful) {
+                kltTracker.initialize(*inFrameOrigGray, ransacInliers);
+                isLost = false;
+            }
+            else {
+                isLost = true;
+                
+            }
+        }
+        
+        if (!isLost) {
+            foundMarker->updatePoints(internalH);
+            estimateMarkerPoses();
+        }
+        return estimation_successful;
+    }
+
     void PlaneTracker::setCamIntrinsics(const cv::Mat &cam, const cv::Mat &dist) {
         camIntrinsics = cam;
         distCoeff = dist;   // this mat can also be empty
@@ -62,7 +129,12 @@ namespace opt_ar
         //TODO
     }
     
-    void PlaneTracker::estimateMarkersPoses() {
+    const float* PlaneTracker::getMarkerPoseMatPtr(){
+        if(isLost) return NULL;
+        return foundMarker->getPoseMatPtr();
+    }
+    
+    void PlaneTracker::estimateMarkerPoses() {
         
         if (foundMarker != NULL) {
             // find marker pose from 3D-2D point correspondences between <normMarkerCoord3D>
@@ -86,6 +158,16 @@ namespace opt_ar
     
     
 #pragma mark - private methods
+    void PlaneTracker::calcFrameBounds(int inputFrameH, int inputFrameW) {
+        //TODO: should be anti-clockwise
+        frameBounds.clear();
+        frameBounds.push_back(Point2f(0, 0));
+        frameBounds.push_back(Point2f(inputFrameH, 0));
+        frameBounds.push_back(Point2f(inputFrameH, inputFrameW));
+        frameBounds.push_back(Point2f(0, inputFrameW));
+
+    }
+    
     void PlaneTracker::setOutputFrameOnCurProcLevel(FrameProcLevel curLvl, cv::Mat *srcFrame) {
         assert(srcFrame);
         if (curLvl == outFrameProcLvl) {
@@ -233,38 +315,5 @@ namespace opt_ar
         return true;
     }
 
-// Implement the tracking logic as described on the project page.
-// Your implementation should follow the logic described in the flowchart.
-bool PlaneTracker::track(const GrayscaleImage &frame, Homography &H)
-{
-    bool estimation_successful = false;
-    MatchHandler match_handler = [&](const PointArray& src_points, const PointArray& dst_points) {
-        assert(src_points.size() == dst_points.size());
-        if(dst_points.size()>=4) {
-            estimation_successful = this->estimateHomography(src_points, dst_points, H);
-        }
-        else {
-            std::cout << "Tracker provided less than 4 correspondences for homography estimation!" << std::endl;
-        }
-    };
-    
-    if (!isLost) {
-        kltTracker.track(frame, match_handler);
-    }
-    
-    if (!estimation_successful || isLost) {
-        internalH = Homography(1, 0, 0,
-                                 0, 1, 0,
-                                 0, 0, 1);
-        orbTracker.track(frame, match_handler);
-        if (estimation_successful) {
-            kltTracker.initialize(frame, ransacInliers);
-            isLost = false;
-        }
-        else
-            isLost = true;
-    }
 
-    return estimation_successful;
-}
 } 

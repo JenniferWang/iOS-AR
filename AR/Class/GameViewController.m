@@ -19,10 +19,7 @@
 
 static NSString *TAG = @"GameViewController";
 
-/**
- * Small helper function to convert a fourCC <code> to
- * a character string <fourCC> for printf and the like
- */
+#pragma mark - helper function
 void fourCCStringFromCode(int code, char fourCC[5]) {
     for (int i = 0; i < 4; i++) {
         fourCC[3 - i] = code >> (i * 8);
@@ -48,8 +45,6 @@ void printFloatMat4x4(const float *m) {
 - (void)initCam;
 
 - (BOOL)initDetector;
-
-//- (BOOL)initORBTracker;
 
 /**
  * Called on the first input frame and prepares everything for the specified
@@ -80,6 +75,7 @@ void printFloatMat4x4(const float *m) {
 - (void)updateViews;
 
 - (void)handleGesture:(UITapGestureRecognizer *)sender;
+
 @end
 
 
@@ -94,20 +90,40 @@ void printFloatMat4x4(const float *m) {
     if (self) {
 
         camIntrinsicsFile = @"ipad3-back.xml";
+        imgTrackerRefFile = @"the-scream.jpg";
+        
         useDistCoeff = USE_DIST_COEFF;
-        // create the detector
-        detector = new ocv_ar::Detect(ocv_ar::IDENT_TYPE_CODE_7X7,  // marker type
-                                      MARKER_REAL_SIZE_M,           // real marker size in meters
-                                      PROJ_FLIP_MODE);              // projection flip mode
-        // create the tracker and pass it a reference to the detector object
-        tracker = new ocv_ar::Track(detector);
+        
+        // create the tracker;
+        tracker = [self initTracker];
+        if (!tracker) {
+            NSLog(@"%@: could not init tracker\n", TAG);
+            return nil;
+        }
         
         isMultiMode = NO;
         isGameRunning = NO;
     }
 
-    //NSLog(@"%@: initWithNibName finished", TAG);
+    NSLog(@"%@: initWithNibName finished", TAG);
     return self;
+}
+
+- (Tracker *)initTracker {
+    const char *refPath = [[[NSBundle mainBundle] pathForResource:imgTrackerRefFile ofType:NULL]cStringUsingEncoding:NSASCIIStringEncoding];
+    
+    if (!refPath) {
+        NSLog(@"could not find reference image file %@", @"the-scream.jpg");
+        return nil;
+    }
+
+    Mat rgbRef = imread(refPath);
+    if (!rgbRef.data) {
+        NSLog(@"OpenCV could not open reference image file %@", @"the-scream.jpg");
+        return nil;
+
+    }
+    return [[Tracker alloc]initWithRefImg: rgbRef];
 }
 
 - (void)dealloc {
@@ -128,8 +144,7 @@ void printFloatMat4x4(const float *m) {
     [baseView release];
     
     // delete marker detection and tracking objects
-    if (tracker) delete tracker;
-    if (detector) delete detector;
+    [tracker release];
     
     [super dealloc];
 }
@@ -168,10 +183,6 @@ void printFloatMat4x4(const float *m) {
     // set a list of buttons for processing output display
     NSArray *btnTitles = [NSArray arrayWithObjects:
                           @"Normal",
-                          @"Preproc",
-                          @"Thresh",
-                          @"Contours",
-                          @"Candidates",
                           @"Detected",
                           nil];
     for (int btnIdx = 0; btnIdx < btnTitles.count; btnIdx++) {
@@ -220,7 +231,7 @@ void printFloatMat4x4(const float *m) {
     }
     
     // set the marker scale for the GL view
-    [glView setMarkerScale:detector->getMarkerScale()];
+    [glView setMarkerScale:[tracker getMarkerScale]];
     
     // set up camera
     [self initCam];
@@ -259,16 +270,13 @@ void printFloatMat4x4(const float *m) {
     // convert the incoming YUV camera frame to a grayscale cv mat
     [Tools convertYUVSampleBuffer:sampleBuffer toGrayscaleMat:curFrame];
     
-    if (!detector->isPrepared()) {  // on first frame: prepare for the frames
-        [self prepareForFramesOfSize:CGSizeMake(curFrame.cols, curFrame.rows)
-                         numChannels:curFrame.channels()];
-    }
+    [self prepareForFramesOfSize:CGSizeMake(curFrame.cols, curFrame.rows) numChannels:curFrame.channels()];
     
     // tell the tracker to run the detection on the input frame
-    tracker->detect(&curFrame);
+    [tracker detectFrame:(&curFrame)];
     
     // get an output frame. may be NULL if no frame processing output is selected
-    dispFrame = detector->getOutputFrame();
+    dispFrame = [tracker getOutputFrame];
     
     // update the views on the main thread
     if (dispFrame) {
@@ -391,38 +399,14 @@ void printFloatMat4x4(const float *m) {
         return NO;
     }
     
-    detector->setCamIntrinsics(camMat, distCoeff);
-    //[self initORBTracker];
+    [tracker setCamMat:camMat DistCoeff:distCoeff];
+
     return YES;
 }
-
-//-(BOOL)initORBTracker {
-//    
-//    const char *refPath = [[[NSBundle mainBundle] pathForResource:@"the-scream.jpg" ofType:NULL]cStringUsingEncoding:NSASCIIStringEncoding];
-//    
-//    if (!refPath) {
-//        NSLog(@"could not find reference image file %@", @"the-scream.jpg");
-//        return NO;
-//    }
-//    
-//    Mat rgbRef = imread(refPath);
-//    if (!rgbRef.data) {
-//        NSLog(@"OpenCV could not open reference image file %@", @"the-scream.jpg");
-//        return NO;
-//    
-//    }
-//    Mat gray;
-//    cvtColor(rgbRef, gray, COLOR_BGR2GRAY);
-//    orbTracker->initialize(gray);
-//    return YES;
-//}
 
 
 - (void)prepareForFramesOfSize:(CGSize)size numChannels:(int)chan {
     // WARNING: this method will not be called from the main thead!
-    
-    detector->prepare(size.width, size.height, chan);
-    
     float frameAspectRatio = size.width / size.height;
     NSLog(@"camera frames are of size %dx%d (aspect %f)", (int)size.width, (int)size.height, frameAspectRatio);
 
@@ -431,26 +415,24 @@ void printFloatMat4x4(const float *m) {
     float viewYOff = (procFrameView.frame.size.height - newViewH) / 2;
     
     CGRect correctedViewRect = CGRectMake(0, viewYOff, procFrameView.frame.size.width, newViewH);
-    [self performSelectorOnMainThread:@selector(setCorrectedFrameForViews:)         // we need to execute this on the main thead
-                           withObject:[NSValue valueWithCGRect:correctedViewRect]   // otherwise it will have no effect
-                        waitUntilDone:NO];
+    [self performSelectorOnMainThread:@selector(setCorrectedFrameForViews:)                            withObject:[NSValue valueWithCGRect:correctedViewRect]waitUntilDone:NO];
 }
 
 - (void)setCorrectedFrameForViews:(NSValue *)newFrameRect {
     // WARNING: this *must* be executed on the main thread
     
     // set the corrected frame for the proc frame view
-    CGRect r = [newFrameRect CGRectValue];
-    [procFrameView setFrame:r];
+    CGRect rr= [newFrameRect CGRectValue];
+    [procFrameView setFrame:rr];
     
     // also calculate a new GL projection matrix and resize the gl view
-    float *projMatPtr = detector->getProjMat(r.size.width, r.size.height);
+    float *projMatPtr = [tracker getProjMatWithViewW:rr.size.width ViewH:rr.size.height];
     NSLog(@"projection matrix:");
     printFloatMat4x4(projMatPtr);
     NSLog(@"------------------");
     [glView setMarkerProjMat:projMatPtr];
-    [glView setFrame:r];
-    [glView resizeView:r.size];
+    [glView setFrame:rr];
+    [glView resizeView:rr.size];
 }
 
 - (void)procOutputSelectBtnAction:(UIButton *)sender {
@@ -462,7 +444,6 @@ void printFloatMat4x4(const float *m) {
     [camView setHidden:!normalDispMode];      // only show original camera frames in "normal" display mode
     [procFrameView setHidden:normalDispMode]; // only show processed frames for other than "normal" display mode
     
-    detector->setFrameOutputLevel((ocv_ar::FrameProcLevel)sender.tag);
 }
 
 - (void)interfaceOrientationChanged:(UIInterfaceOrientation)o {

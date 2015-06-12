@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3806E26A1B2A35D000EFBFB1 /* Tracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 3806E2691B2A35D000EFBFB1 /* Tracker.m */; };
 		3835C7B21B1AB4DF00B8291E /* Data.m in Sources */ = {isa = PBXBuildFile; fileRef = 3835C7B11B1AB4DF00B8291E /* Data.m */; };
 		383BB4691B15828D000CDB85 /* MPCHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 383BB4681B15828D000CDB85 /* MPCHandler.m */; };
 		383BB46D1B158F76000CDB85 /* ConnectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 383BB46B1B158F76000CDB85 /* ConnectionViewController.m */; };
@@ -71,6 +72,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3806E2681B2A35D000EFBFB1 /* Tracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tracker.h; sourceTree = "<group>"; };
+		3806E2691B2A35D000EFBFB1 /* Tracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tracker.m; sourceTree = "<group>"; };
 		3835C7B01B1AB4DF00B8291E /* Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Data.h; sourceTree = "<group>"; };
 		3835C7B11B1AB4DF00B8291E /* Data.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Data.m; sourceTree = "<group>"; };
 		383BB4671B15828D000CDB85 /* MPCHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPCHandler.h; sourceTree = "<group>"; };
@@ -285,6 +288,8 @@
 				383BB46A1B158F76000CDB85 /* ConnectionViewController.h */,
 				383BB46B1B158F76000CDB85 /* ConnectionViewController.m */,
 				383BB46C1B158F76000CDB85 /* ConnectionViewController.xib */,
+				3806E2681B2A35D000EFBFB1 /* Tracker.h */,
+				3806E2691B2A35D000EFBFB1 /* Tracker.m */,
 			);
 			name = Classes;
 			path = Class;
@@ -525,6 +530,7 @@
 				383BB46D1B158F76000CDB85 /* ConnectionViewController.m in Sources */,
 				38BBAD411B0716950017954A /* marker.cpp in Sources */,
 				3835C7B21B1AB4DF00B8291E /* Data.m in Sources */,
+				3806E26A1B2A35D000EFBFB1 /* Tracker.m in Sources */,
 				38BBAD3D1B0716950017954A /* ident.cpp in Sources */,
 				384B8B321B10157E0013AAB6 /* GLView.m in Sources */,
 			);

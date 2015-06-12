@@ -16,9 +16,12 @@ namespace opt_ar{
 class ImgMarker {
 public:
     
-    ImgMarker(PointVec &pts);
+//    ImgMarker(PointVec &pts);
+    ImgMarker(Point2fVec &bds);
     
-    ImgMarker(Point2fVec &pts);
+    ImgMarker(Point2fVec &pts, Point2fVec &bds);
+    
+    ImgMarker(const ImgMarker &other);
     
     ~ImgMarker();
     
@@ -30,6 +33,9 @@ public:
     
     // Return the corner points of this marker.
     Point2fVec getPoints() const { return points; }
+    
+    // Only update points positions by homography
+    void updatePoints(const Homography &H);
     
     // Set the points in <pVec>.
     void setPoints(const Point2fVec &pVec) { points.assign(pVec.begin(), pVec.end()); }
@@ -72,37 +78,24 @@ private:
     // and perimeter radius.
     void calcShapeProperties();
     
-    // Update vector history arrays for smoothing (<tVecHist> and <rVecHist>) with
-    // elements from <r> and <t> (3-component vectors each).
-    void pushVecsToHistory(const float *r, const float *t);
-    
-    /**
-     * Updates <r> and <t> with new values calulated by taking into account the former
-     * pose vector values in <rVecHist> and <tVecHist>. <r> and <t> are 3-component
-     * vectors each.
-     */
-    void calcSmoothPoseVecs(float *r, float *t);
-
     // Calculate the 3D pose matrix from translation and rotation vectors <rVec> and
     // <tVec>.
     void calcPoseMat();
     
     double detectMs;        // timestamp of last detection in milliseconds
     
-    Point2fVec points;      // corner points
-    
+    Point2fVec points;      // corner points of the detected marker
+    Point2fVec bounds;      // corner points of the reference marker
     cv::Point2f centroid;   // centroid formed by the corner points
     float perimeterRad;     // perimenter radius formed by the corner points
     
     cv::Mat rVec;           // 3D pose rotation vector
     cv::Mat tVec;           // 3D pose translation vector
     
-    int pushedHistVecs;     // number of vectors in <tVecHist> and <rVecHist>
-    
-    float *tVecHist;        // marker position history with N * 3 elements for smoothing effect
-    float *rVecHist;        // marker rotation history with N * 3 elements (euler vectors) for smoothing effect
-    
     float poseMat[16];      // OpenGL 4x4 matrix with model-view-transformation
+    
+    
+
 };
     
 }

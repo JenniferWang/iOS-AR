@@ -23,8 +23,6 @@ namespace opt_ar
     
     typedef enum _FrameProcLevel {
         PROC_LEVEL_DEFAULT = -1,
-        PROC_LEVEL_PREPROC,
-        PROC_LEVEL_ORB,
         PROC_LEVEL_DETECTED_MARKERS
     } FrameProcLevel;
     

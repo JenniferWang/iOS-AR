@@ -13,6 +13,7 @@ namespace opt_ar{
     
 #pragma mark public methods
     
+    /*
     ImgMarker::ImgMarker(PointVec &pts){
         for (int i = 0; i < 4; i++) {
             points.push_back(cv::Point2f(pts[i].x, pts[i].y));
@@ -20,16 +21,31 @@ namespace opt_ar{
         
         init();
     }
-    
-    ImgMarker::ImgMarker(Point2fVec &pts) {
-        points.assign(pts.begin(), pts.begin() + 4);
+    */
+    ImgMarker::ImgMarker(Point2fVec &bds) {
+        points.assign(bds.begin(), bds.begin() + 4);
+        bounds.assign(bds.begin(), bds.begin() + 4);
         init();
+    }
+    
+    ImgMarker::ImgMarker(Point2fVec &pts, Point2fVec &bds) {
+        points.assign(pts.begin(), pts.begin() + 4);
+        bounds.assign(bds.begin(), bds.begin() + 4);
+        init();
+    }
+    
+    ImgMarker::ImgMarker(const ImgMarker &other) {
+        setPoints(other.getPoints());
+        init();
+        
+        rVec = other.getRVec().clone();
+        tVec = other.getTVec().clone();
+            //    updatePoseMat(other.getRVec(), other.getTVec());
+ 
     }
     
     ImgMarker::~ImgMarker() {
         printf("opt_ar::Marker (%p) - deconstructor call\n", this);
-        if (rVecHist) delete [] rVecHist;
-        if (tVecHist) delete [] tVecHist;
     }
     
     void ImgMarker::updateDetectionTime() {
@@ -52,27 +68,6 @@ namespace opt_ar{
         r.convertTo(rVec, CV_32F);
         t.convertTo(tVec, CV_32F);
         
-        // get pointers to the data
-        float *rVecPtr = rVec.ptr<float>(0);
-        float *tVecPtr = tVec.ptr<float>(0);
-        
-        // "rVec" is an OpenCV rotation vector -> convert it to
-        // an Euler vector for interpolation
-        float rVecEu[3];
-        Tools::rotVecToEuler(rVecPtr, rVecEu);
-        
-        // push the R and T vectors to the vector history for interpolation
-        pushVecsToHistory(rVecEu, tVecPtr);
-        
-        // if we have enough data, calculate the interpolated pose vectors
-        if (pushedHistVecs >= OPT_AR_CONF_SMOOTHING_HIST_SIZE) {
-            calcSmoothPoseVecs(rVecEu, tVecPtr);
-        }
-        
-        // convert back to rotation vector and save the result inside the
-        // OpenCV matrix
-        Tools::eulerToRotVec(rVecEu, rVecPtr);
-        
         // re-calculate the pose matrix from <rVec> and <tVec>
         calcPoseMat();
     }
@@ -90,22 +85,19 @@ namespace opt_ar{
         calcPoseMat();
         
     }
+    
+    void ImgMarker::updatePoints(const Homography &H) {
+        
+        //points = cv::multiply(points, H, points);
+        perspectiveTransform(bounds, points, H);
+    }
+    
 #pragma mark private methods
     void ImgMarker::init() {
         // set defaults
-        pushedHistVecs = 0;
-        
         rVec.zeros(3, 1, CV_32F);
         tVec.zeros(3, 1, CV_32F);
-        
-        // create vectory history arrays
-        tVecHist = new float[OPT_AR_CONF_SMOOTHING_HIST_SIZE * 3];
-        rVecHist = new float[OPT_AR_CONF_SMOOTHING_HIST_SIZE * 3];
-        
-        // initialize them with zeros
-        memset(tVecHist, 0, sizeof(float) * OPT_AR_CONF_SMOOTHING_HIST_SIZE * 3);
-        memset(rVecHist, 0, sizeof(float) * OPT_AR_CONF_SMOOTHING_HIST_SIZE * 3);
-        
+    
         sortPoints();
         calcShapeProperties();
         updateDetectionTime();  // set to now
@@ -140,53 +132,6 @@ namespace opt_ar{
         
         perimeterRad = maxDist;
         
-    }
-    
-    void ImgMarker::pushVecsToHistory(const float *r, const float *t) {
-        const int numHistElems = OPT_AR_CONF_SMOOTHING_HIST_SIZE * 3;
-        
-        // delete the oldest elements and move up the newer ones
-        for (int i = 3; i < numHistElems; i++) {
-            tVecHist[i - 3] = tVecHist[i];
-            rVecHist[i - 3] = rVecHist[i];
-        }
-        
-        // add the new elements to the last position
-        tVecHist[numHistElems - 3] = t[0];
-        tVecHist[numHistElems - 2] = t[1];
-        tVecHist[numHistElems - 1] = t[2];
-        
-        rVecHist[numHistElems - 3] = r[0];
-        rVecHist[numHistElems - 2] = r[1];
-        rVecHist[numHistElems - 1] = r[2];
-        
-        if (pushedHistVecs < OPT_AR_CONF_SMOOTHING_HIST_SIZE) {
-            pushedHistVecs++;
-        }
-    }
-    
-    void ImgMarker::calcSmoothPoseVecs(float *r, float *t) {
-        // calculate the avarage rotation angle for all axes (n)
-        for (int n = 0; n < 3; n++) {
-            float buff[OPT_AR_CONF_SMOOTHING_HIST_SIZE];
-            for (int i = 0; i < OPT_AR_CONF_SMOOTHING_HIST_SIZE; i++) {
-                buff[i] = rVecHist[i * 3 + n];
-            }
-            r[n] = Tools::getAverageAngle(buff, OPT_AR_CONF_SMOOTHING_HIST_SIZE);
-        }
-        
-        // calculate the translation vector by forming the average of the former values
-        t[0] = t[1] = t[2] = 0;    // reset to zeros
-        
-        for (int i = 0; i < OPT_AR_CONF_SMOOTHING_HIST_SIZE ; i++) {
-            t[0] += tVecHist[i * 3    ];
-            t[1] += tVecHist[i * 3 + 1];
-            t[2] += tVecHist[i * 3 + 2];
-        }
-        
-        t[0] /= OPT_AR_CONF_SMOOTHING_HIST_SIZE;
-        t[1] /= OPT_AR_CONF_SMOOTHING_HIST_SIZE;
-        t[2] /= OPT_AR_CONF_SMOOTHING_HIST_SIZE;
     }
     
     void ImgMarker::calcPoseMat(){

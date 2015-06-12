@@ -12,9 +12,9 @@
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
 #import <QuartzCore/QuartzCore.h>
+#import "Tracker.h"
 
 #include "helper/shader.h"
-#include "ocv_ar.h"
 
 using namespace cv;
 using namespace std;
@@ -45,7 +45,7 @@ using namespace std;
 
 }
 
-@property (nonatomic, assign) ocv_ar::Track *tracker;   // tracker object that handles marker tracking and motion interpolation
+@property (nonatomic, assign) Tracker *tracker;   // tracker object that handles marker tracking and motion interpolation
 @property (nonatomic, assign) float *markerProjMat;     // 4x4 projection matrix
 @property (nonatomic, assign) float markerScale;        // marker scaling
 @property (nonatomic, assign) BOOL showMarkers;         // enable/disable marker display

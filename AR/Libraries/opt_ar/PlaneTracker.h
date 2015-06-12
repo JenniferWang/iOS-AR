@@ -13,20 +13,18 @@ namespace opt_ar
     public:
         
         PlaneTracker() = default;
-        
         ~PlaneTracker();
-        
         void initialize(const ColorImage& referFrame);
         
         void setInputFrame(const ColorImage &frame);
-        
         void setCamIntrinsics(const cv::Mat &camMat, const cv::Mat &distCoeff);
-        
         void setFrameOutputLevel(FrameProcLevel level);
         
-        bool track(const GrayscaleImage& frame, Homography& H);
+        bool track();
         
-        void estimateMarkersPoses();
+        void estimateMarkerPoses();
+        const float *getMarkerPoseMatPtr();
+        
         
         /**
          * Get the output frame according to the "frame output level" set via
@@ -34,8 +32,8 @@ namespace opt_ar
          * return NULL, otherwise it will return a weak pointer.
          */
         cv::Mat *getOutputFrame() const;
-        
-        ImgMarker *getMarker() const { return foundMarker; }
+        ImgMarker *getMarker() const {
+            return isLost? NULL: foundMarker; }
         
         /**
          * Return a 4x4 OpenGL projection matrix that can be used to display the found
@@ -61,33 +59,34 @@ namespace opt_ar
         // See <getProjMat()>
         void calcProjMat(float viewW, float viewH);
         
-        KLTTracker kltTracker;
+        void calcFrameBounds(int inputFrameH, int inputFrameW);
         
+        KLTTracker kltTracker;
         ORBTracker orbTracker;
         
         GrayscaleImage* refFrame;
-        
         GrayscaleImage* procFrame;
-        
         GrayscaleImage* outFrame;          // output frame for debugging, grayscale
-        
         GrayscaleImage* inFrameOrigGray;
-        
-        Homography internalH;
-        
-        PointArray ransacInliers;
-        
-        ImgMarker *foundMarker;
-        
-        bool isLost;
-                
-        bool estimateHomography(const PointArray& src_points, const PointArray& dst_points, Homography& H);
         
         FrameProcLevel outFrameProcLvl; // frame output processing level
         
         int inputFrameW;            // original input frame width
         int inputFrameH;            // original input frame height
         
+        Point2fVec frameBounds;
+        
+        Homography internalH; // homography between ref and current
+        Homography currentH; // homography between current and previous frame
+        
+        PointArray ransacInliers;
+        
+        ImgMarker *foundMarker;
+        
+        bool isLost;
+
+        bool estimateHomography(const PointArray& src_points, const PointArray& dst_points, Homography& H);
+
         int normMarkerSize;
         Point2fVec normMarkerCoord2D;	// standard coordinates for a normalized rectangular marker in 2D
         Point3fVec normMarkerCoord3D;	// standard coordinates for a normalized rectangular marker in 3D

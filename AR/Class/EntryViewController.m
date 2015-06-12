@@ -22,7 +22,7 @@ static NSString *TAG = @"EntryViewController";
 
 @implementation EntryViewController
 
-#pragma mark protocal
+#pragma mark protocol
 
 - (void)dealloc {
     

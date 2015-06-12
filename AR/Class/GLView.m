@@ -36,9 +36,9 @@ void copyMatrix4(const float *input, float* output) {
 
 - (BOOL)buildShader:(Shader *)shader src:(NSString *)src;
 
-- (void)drawMarker:(const ocv_ar::Marker *)marker;
+- (void)drawMarker:(const float[])mkPosMat;
 
-- (GLKMatrix4)updateModelViewMat: (const ocv_ar::Marker *)marker WithTapAtX:(float) x Y:(float) y;
+//- (GLKMatrix4)updateModelViewMat: (const ocv_ar::Marker *)marker WithTapAtX:(float) x Y:(float) y;
 
 - (BOOL)unProjectAtWinPos:(const GLKVector3 &)winpos WithModelViewMat:(const GLKMatrix4 &)modelViewMat ProjectMat:(const GLKMatrix4 &)projMat ObjectPos:(GLKVector3 &)objectPos;
 
@@ -108,24 +108,14 @@ void copyMatrix4(const float *input, float* output) {
     if (!showMarkers) return;   // break here in order not to display markers
     
     // update the tracker to smoothly move to new marker positions
-    tracker->update();
+    [self.tracker updateFrame];
     
     // use the marker shader
     markerDispShader.use();
     
     if (markerProjMat) {
-        tracker->lockMarkers();     // lock the tracked markers, because they might get updated in a different thread
         
-        // draw each marker
-        const ocv_ar::MarkerMap *markers = tracker->getMarkers();
-        for (ocv_ar::MarkerMap::const_iterator it = markers->begin();
-             it != markers->end();
-             ++it)
-        {
-            [self drawMarker:&(it->second)];
-        }
-        
-        tracker->unlockMarkers();   // unlock the tracked markers again
+        [self drawMarker:[self.tracker getMarkerPoseMatPtr]];
     }
 }
 
@@ -175,8 +165,8 @@ void copyMatrix4(const float *input, float* output) {
     if (!self.markerProjMat) {
         return NO;
     }
-    const ocv_ar::MarkerMap *markers = tracker->getMarkers();
-    if (markers->empty()) {
+
+    if ([self.tracker isLost]) {
         return NO;
     }
     
@@ -196,48 +186,48 @@ void copyMatrix4(const float *input, float* output) {
 }
 
 // TODO: not returning the correct decision
-- (BOOL)unProjectAtWinPos:(const GLKVector3 &)winpos WithModelViewMat:(const GLKMatrix4 &)modelViewMat ProjectMat:(const GLKMatrix4 &)projMat ObjectPos:(GLKVector3 &)objectPos {
-    
-    //Transformation matrices
-    bool isInvertible;
-    GLKVector4 inVec, outVec;
-    GLKVector4 viewPort = GLKVector4Make(0.0, 0.0, viewportSize.width, viewportSize.height);
-    
-    //Calculation for inverting a matrix, compute projection x modelview
-    //and store in A[16]
-    GLKMatrix4 A = GLKMatrix4Multiply(projMat, modelViewMat);
-    GLKMatrix4 inverse = GLKMatrix4Invert(A, &isInvertible);
-    
-    if (!isInvertible) {
-        NSLog(@"%@: matrix not invertible", TAG);
-        return NO;
-    }
-    inVec.x = (winpos.x - viewPort.x) / viewPort.z * 2.0 - 1.0;
-    inVec.y = (winpos.y - viewPort.y) / viewPort.w * 2.0 - 1.0;
-    inVec.z = 2.0 * winpos.z - 1.0;
-    inVec.w = 1.0;
+//- (BOOL)unProjectAtWinPos:(const GLKVector3 &)winpos WithModelViewMat:(const GLKMatrix4 &)modelViewMat ProjectMat:(const GLKMatrix4 &)projMat ObjectPos:(GLKVector3 &)objectPos {
+//    
+//    //Transformation matrices
+//    bool isInvertible;
+//    GLKVector4 inVec, outVec;
+//    GLKVector4 viewPort = GLKVector4Make(0.0, 0.0, viewportSize.width, viewportSize.height);
+//    
+//    //Calculation for inverting a matrix, compute projection x modelview
+//    //and store in A[16]
+//    GLKMatrix4 A = GLKMatrix4Multiply(projMat, modelViewMat);
+//    GLKMatrix4 inverse = GLKMatrix4Invert(A, &isInvertible);
+//    
+//    if (!isInvertible) {
+//        NSLog(@"%@: matrix not invertible", TAG);
+//        return NO;
+//    }
+//    inVec.x = (winpos.x - viewPort.x) / viewPort.z * 2.0 - 1.0;
+//    inVec.y = (winpos.y - viewPort.y) / viewPort.w * 2.0 - 1.0;
+//    inVec.z = 2.0 * winpos.z - 1.0;
+//    inVec.w = 1.0;
+//
+//    //Objects coordinates
+//    outVec = GLKMatrix4MultiplyVector4(inverse, inVec);
+//    if (outVec.w == (GLfloat)0.0) {
+//        NSLog(@"%@: w is 0", TAG);
+//        return NO;
+//    }
+//    outVec.w = 1.0 / outVec.w;
+//    objectPos.x = outVec.x * outVec.w;
+//    objectPos.y = outVec.y * outVec.w;
+//    objectPos.z = outVec.z * outVec.z;
+//    
+//    NSLog(@"%@: object pos at (%f, %f, %f)", TAG, objectPos.x, objectPos.y, objectPos.z);
+//    
+//    return YES;
+//}
 
-    //Objects coordinates
-    outVec = GLKMatrix4MultiplyVector4(inverse, inVec);
-    if (outVec.w == (GLfloat)0.0) {
-        NSLog(@"%@: w is 0", TAG);
-        return NO;
-    }
-    outVec.w = 1.0 / outVec.w;
-    objectPos.x = outVec.x * outVec.w;
-    objectPos.y = outVec.y * outVec.w;
-    objectPos.z = outVec.z * outVec.z;
-    
-    NSLog(@"%@: object pos at (%f, %f, %f)", TAG, objectPos.x, objectPos.y, objectPos.z);
-    
-    return YES;
-}
-
-- (void)drawMarker:(const ocv_ar::Marker *)marker {
+- (void)drawMarker:(const float[])pos {
 
     // update transform matrixes
     float mat[16];
-    copyMatrix4(marker->getPoseMatPtr(), mat);
+    copyMatrix4(pos, mat);
     markerModelViewMat = GLKMatrix4MakeWithArray(mat);
     markerProjectionMat = GLKMatrix4MakeWithArray(markerProjMat);
 

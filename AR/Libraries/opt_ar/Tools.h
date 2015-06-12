@@ -13,8 +13,8 @@
  * See LICENSE for license.
  */
 
-#ifndef __OpticalFlow__Tools__
-#define __OpticalFlow__Tools__
+#ifndef OCV_AR_TOOLS_H
+#define OCV_AR_TOOLS_H
 
 
 #include <opencv2/core/core.hpp>
